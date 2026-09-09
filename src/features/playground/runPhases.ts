@@ -61,6 +61,13 @@ export interface RunState {
   log: string | null;
   /** A step wrote FAILED. The job may still be retried, so this is not terminal. */
   failing: boolean;
+  /**
+   * Attempts already made, from the response. The ceiling is deliberately not
+   * shown: `max_attempts` is a per-job column the result schema does not
+   * expose, and hardcoding the default here would be the frontend keeping its
+   * own copy of a backend value.
+   */
+  attempt: number;
   /** Per-field outcomes in the order the worker compared them. */
   marks: RunMark[];
   matched: number;
@@ -120,9 +127,18 @@ function describe(step: StepResult): string {
 }
 
 function captionFor(phase: number, state: Omit<RunState, "caption" | "word" | "hue">): string {
-  const { documents, pages, strategy, model, marks, matched } = state;
+  const { documents, pages, strategy, model, marks, matched, attempt } = state;
 
-  if (phase === 0) return "waiting for a worker to claim it";
+  // A QUEUED job that has already been attempted is in retry backoff, not
+  // waiting for its first worker. The two look identical otherwise, and reading
+  // the second as the first is how a job that is failing repeatedly gets
+  // mistaken for a job nothing has picked up. `attempt_count` is on the
+  // response, so this is reported rather than guessed.
+  if (phase === 0) {
+    return attempt > 0
+      ? `attempt ${attempt} failed · retrying shortly`
+      : "waiting for a worker to claim it";
+  }
   if (phase === 1) return "locating and hashing the bytes";
 
   const received =
@@ -177,6 +193,7 @@ export function readRun(
     phase,
     log: steps.length > 0 ? describe(steps[steps.length - 1]) : null,
     failing: steps.some((step) => step.status === "FAILED"),
+    attempt: result.attempt_count,
     marks,
     matched: marks.filter((mark) => mark.matchStatus === "MATCH").length,
     documents: readNumber(resolveStep?.data ?? null, "documents"),
