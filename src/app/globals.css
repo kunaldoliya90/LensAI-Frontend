@@ -1,0 +1,1094 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  /* The whole product is dark. Grounds run darkest (the page) to lightest
+     (panels sitting on it), so depth still reads without a single shadow. */
+  --color-deep: #070c18;
+  --color-deep-2: #0d1526;
+  --color-surface: #090f1c;
+  --color-ground: #0f172b;
+  --color-surface-strong: #18223a;
+
+
+  --color-ink: #e8eefb;
+  --color-ink-muted: #9aa9c4;
+  --color-ink-subtle: #77869f;
+
+  --color-line: #1e293f;
+  --color-line-strong: #2f3d59;
+
+  /* Two accents, because one cannot do both jobs on a dark ground: `accent`
+     carries white text on a button, `accent-bright` is legible as text. */
+  --color-accent: #4f46e5;
+  --color-accent-bright: #8b95f8;
+  --color-accent-soft: #1b2247;
+
+  /* The high-contrast button fill, kept separate from the accent because the
+     console design resolves it to ink-on-paper while marketing and auth keep
+     the indigo. */
+  --color-btn: #4f46e5;
+  --color-btn-hover: #4338ca;
+  --color-btn-fg: #ffffff;
+
+  /* The recessed fill behind an endpoint, a signing snippet, inline code. */
+  --color-code: rgb(0 0 0 / 0.24);
+
+  --color-pass: #34d399;
+  --color-pass-soft: #0e2a20;
+  --color-fail: #fb7185;
+  --color-fail-soft: #2d1219;
+  --color-warn: #fbbf24;
+  --color-warn-soft: #2b2110;
+  --color-neutral: #9aa9c4;
+  --color-neutral-soft: #18223a;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+
+  /* Elevation, tuned for a dark ground: a shadow only reads here if it is
+     genuinely darker than the surface it falls on. */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.35);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 8px 20px -6px rgb(0 0 0 / 0.55), 0 2px 6px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 24px 50px -14px rgb(0 0 0 / 0.7), 0 8px 18px -8px rgb(0 0 0 / 0.5);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* The console panel's elevation: an inner top highlight so the card reads as
+     lit from above, a contact shadow, and one long soft cast. */
+  --shadow-panel:
+    inset 0 1px 0 rgb(255 255 255 / 0.1), 0 1px 2px rgb(0 0 0 / 0.35),
+    0 24px 60px -32px rgb(0 0 0 / 0.85);
+
+  /* The vivid set. Used on the dark marketing surfaces only — the console
+     keeps the semantic palette so a colour there still means a status. */
+  --color-viv-indigo: #6366f1;
+  --color-viv-violet: #a855f7;
+  --color-viv-sky: #38bdf8;
+  --color-viv-cyan: #22d3ee;
+  --color-viv-emerald: #34d399;
+  --color-viv-amber: #fbbf24;
+  --color-viv-rose: #fb7185;
+
+  --animate-aurora: aurora 18s ease-in-out infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-beam: beam 3.2s ease-in-out infinite;
+}
+
+/* The console's grounds and its two glow sets, as gradients rather than
+   colours — they cannot live in @theme, which only takes single values. These
+   are Neon's, the ground the console opens on, and they sit on :root rather
+   than in their own block so that .panel paints correctly anywhere;
+   Porcelain overrides every one of them below.
+
+   The point of the set: a panel here is a pane of violet glass over a
+   near-black page, not a grey box. --panel is a lift of violet-white,
+   --panel-glow is what that pane throws when the pointer is on it, and
+   --glow-a/b/c are the three slow colour fields — violet, violet, cyan —
+   drifting behind the whole console. Swap these five and the console changes
+   ground; no component knows the difference. */
+:root {
+  /* The top stop stays well short of the violet the design puts there, for two
+     reasons. The field is painted twice — this gradient and the drifting spans
+     over it — so a stop bright enough to look right alone composites, under the
+     top-right span, into a panel too light to carry its own text. And a panel
+     high on the page would otherwise read as a different colour from the same
+     panel lower down, because a pane of glass shows what is behind it. */
+  --console-bg: radial-gradient(125% 95% at 78% -14%, #2a1a52 0%, #170e36 44%, #06050e 100%);
+  --sidebar: linear-gradient(180deg, rgb(216 190 255 / 0.09), rgb(216 190 255 / 0.02));
+
+  /* The floor a panel paints on, under the translucent gradient.
+
+     Without it a panel was almost entirely whatever --console-bg happened to
+     be behind it, and this ground runs from #2a1a52 at the top right to
+     #06050e at the bottom left — so two identical panels on one page were
+     visibly different colours, and the first one on every screen read as
+     highlighted. The base makes a panel mostly itself and only tinted by the
+     page, which is what keeps the field atmosphere instead of a wash across
+     the content. */
+  --panel-base: rgb(28 19 64 / 0.7);
+  --mark: linear-gradient(150deg, #4c2a86, #1b1038);
+  --panel: linear-gradient(
+    155deg,
+    rgb(216 190 255 / 0.12),
+    rgb(216 190 255 / 0.042) 46%,
+    rgb(216 190 255 / 0.02)
+  );
+  --panel-warn: linear-gradient(
+    155deg,
+    rgb(252 211 77 / 0.16),
+    rgb(216 190 255 / 0.04) 55%,
+    rgb(216 190 255 / 0.018)
+  );
+
+  /* What a pane throws under the pointer, and the drifting field behind it. */
+  --panel-glow: 0 0 0 1px rgb(216 180 254 / 0.3), 0 26px 74px -28px rgb(168 85 247 / 0.7);
+  --glow-a: radial-gradient(closest-side, rgb(139 92 246 / 0.42), transparent);
+  --glow-b: radial-gradient(closest-side, rgb(168 85 247 / 0.4), transparent);
+  --glow-c: radial-gradient(closest-side, rgb(34 211 238 / 0.3), transparent);
+
+  /* The primary button's fill and its cast. Unset outside the console, where
+     .btn-primary falls back to the flat --color-btn it always used. */
+  --btn-image: none;
+  --btn-glow: none;
+
+  /* The lip on a text field or a select. Its own token because it is the one
+     shadow that has to be darker than the surface on every ground — a control
+     is pressed into the panel, not lifted off it. */
+  --control-inset: inset 0 1px 2px rgb(4 2 14 / 0.5);
+
+  /* Four console treatments that belong to the ground rather than to a
+     component, and that no Tailwind colour token can express: how a plain stat
+     figure is sized and filled, the mark on the rail's current row, and the
+     fill of a chart bar. Neutral here — a figure paints in whatever ink it was
+     given, the mark is the accent, the bar is the accent lightened — and Neon
+     replaces all four below, the same way it replaces --btn-image. A component
+     asks for the treatment; the ground decides what it looks like. */
+  --figure-size: 26px;
+  --figure-image: none;
+  --figure-fill: currentColor;
+  --nav-active-mark: inset 2px 0 0 var(--color-accent), 0 0 20px -8px var(--color-accent);
+  --bar-image: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-accent) 74%, #ffffff),
+    var(--color-accent)
+  );
+}
+
+@keyframes aurora {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.85;
+  }
+  33% {
+    transform: translate3d(6%, -4%, 0) scale(1.12);
+    opacity: 1;
+  }
+  66% {
+    transform: translate3d(-5%, 3%, 0) scale(0.95);
+    opacity: 0.75;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes stage-sweep {
+  0% {
+    transform: translateY(-45%);
+    opacity: 0;
+  }
+  25%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(345%);
+    opacity: 0;
+  }
+}
+
+@keyframes stage-halo {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.09);
+    opacity: 1;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes land {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes beam {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  25%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The console's two grounds. The marketing site is dark and does not switch.
+   ---------------------------------------------------------------------------
+   Only the tokens are redefined, on the console's own root element. Every
+   component paints with bg-ground, text-ink, border-line, the semantic set and
+   the .panel card class, so they follow the variables down the tree and not one
+   component file needs a per-theme variant. That is the whole return on the
+   token layer, and it is why two complete grounds cost one block each.
+
+   Both are the console design's own palettes. "Neon" is the loud one — violet
+   glass over a near-black page, not the navy in @theme, which is the marketing
+   palette — and "Porcelain" is warm paper rather than white on black inverted.
+   Values are the design's except where contrast forced a change; in each case
+   the note says why.
+
+   Some tokens have to be inverted rather than lightened between the two, not
+   scaled: accent-bright and the pass / warn / fail semantics are chosen to be
+   BRIGHTER than surrounding text on a dark ground and DARKER than it on paper.
+
+   Why an attribute on a wrapper rather than a media query: the choice is the
+   user's, per area, and ConsoleShell holds it in one place. */
+
+/* What both grounds share: the face, the radii, and the fact that the wrapper
+   is the element that paints the page. */
+[data-theme="neon"],
+[data-theme="porcelain"] {
+  /* The console is set in Geist, the design's face. Marketing and auth keep
+     Inter, so the families are re-pointed here rather than in @theme. */
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  /* Panels are 12px in the console and controls 8px — Neon takes both a step
+     up, in its own block. Re-valuing the variables the utilities already read
+     leaves the marketing radii alone. */
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  background-color: var(--color-surface);
+  background-image: var(--console-bg);
+}
+
+/* --- Neon: violet glass on a near-black page ----------------------------
+   The design's loud one. The page is near-black violet with two colour fields
+   drifting behind it, panels are translucent sheets of violet-white, the
+   accent glows, and a plain stat figure is filled with a gradient rather than
+   painted in an ink.
+
+   Every value below is measured against the panel, which composites to roughly
+   #241940 over the middle of this page and to #3f2e67 at its brightest — high
+   on the right, under the violet field, where a panel is lightest and its text
+   has the least to work with. That worst case is what decides an ink here, not
+   the average one. */
+[data-theme="neon"] {
+  /* The design's 16px card and 10px control, against Porcelain's 12 and 8. */
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --color-surface: #06050e; /* the page */
+  /* Just above where the panel gradient composites, so a field or a secondary
+     button on a panel reads as a plate on glass rather than a hole cut in it.
+     The 1px line around it is what says which way it is raised. */
+  --color-ground: #2a1e4a; /* opaque panels, inputs, dialogs */
+  --color-surface-strong: rgb(216 190 255 / 0.1); /* hovers, insets, chips */
+  --color-deep: #05040c;
+  --color-deep-2: #150e2e;
+
+  /* 10.5:1, 6.4:1 and 5.2:1 against the brightest panel. Violet-tinted rather
+     than grey, the way Porcelain's are warm rather than neutral: an ink that
+     ignores the ground under it reads as dirty. ink-subtle is #b1a8d2 and not the
+     design's #8a83ab, which lands at 2.9:1 there — and it is the ink carrying
+     the mono micro-labels and the table headers, the smallest text here. */
+  --color-ink: #f4f1ff;
+  --color-ink-muted: #c3bbe2;
+  --color-ink-subtle: #b1a8d2;
+
+  /* Translucent and violet-white, so a hairline composites into whichever
+     ground it lands on rather than laying a flat grey over the panel. */
+  --color-line: rgb(190 170 255 / 0.17);
+  --color-line-strong: rgb(190 170 255 / 0.3);
+
+  /* Two violets, because one cannot do both jobs: `accent` is a fill — bars,
+     rings, the selection — and `accent-bright` is the one that has to be
+     legible AS text, which #a855f7 is not (2.6:1 on the brightest panel). */
+  --color-accent: #a855f7;
+  --color-accent-bright: #d8b4fe;
+  --color-accent-soft: rgb(168 85 247 / 0.2);
+
+  /* The flat fill under the gradient below, and the hover. Both carry white. */
+  --color-btn: #7c3aed;
+  --color-btn-hover: #6d28d9;
+  --color-btn-fg: #ffffff;
+
+  /* The design's set, brightened where the panel forced it: 7.2:1, 8.1:1 and
+     5.4:1. fail is #ff8f9f rather than the design's #fb7185, which reaches
+     only 4.3:1 on the brightest panel and is the one status a person must not
+     miss. */
+  --color-pass: #34e5a3;
+  --color-pass-soft: rgb(52 229 163 / 0.14);
+  --color-fail: #ff8f9f;
+  --color-fail-soft: rgb(255 143 159 / 0.14);
+  --color-warn: #fcd34d;
+  --color-warn-soft: rgb(252 211 77 / 0.14);
+  --color-neutral: #c3bbe2;
+  --color-neutral-soft: rgb(190 170 255 / 0.1);
+
+  --color-code: rgb(3 2 12 / 0.5);
+
+  /* Elevation, violet-black rather than neutral black: the cast under a pane of
+     glass should be the page's own colour, darker. */
+  --shadow-xs: 0 1px 2px 0 rgb(4 2 14 / 0.55);
+  --shadow-sm: 0 1px 3px rgb(4 2 14 / 0.6), 0 1px 2px -1px rgb(4 2 14 / 0.5);
+  --shadow-md: 0 8px 22px -6px rgb(4 2 14 / 0.75), 0 2px 6px -2px rgb(4 2 14 / 0.55);
+  --shadow-lg: 0 24px 55px -14px rgb(4 2 14 / 0.85), 0 8px 18px -8px rgb(4 2 14 / 0.65);
+  --shadow-panel:
+    inset 0 1px 0 rgb(216 190 255 / 0.16), 0 1px 2px rgb(4 2 14 / 0.55),
+    0 28px 68px -32px rgb(4 2 14 / 0.95);
+
+  /* The primary button runs cyan into violet into magenta as the design has it,
+     but darkened along its whole length: the design's own #22d3ee start carries
+     white text at 1.8:1, where these three stops clear AA at 5.4, 5.7 and 6.3.
+     The brightness that came off the cyan is in the cast under the button,
+     which is where it can be as loud as it likes. */
+  --btn-image: linear-gradient(120deg, #0e7490 0%, #7c3aed 55%, #a21caf 100%);
+  --btn-glow:
+    0 10px 30px -10px rgb(168 85 247 / 0.9), 0 4px 20px -12px rgb(34 211 238 / 0.85);
+
+  /* What makes this a direction and not a palette. The figure is bigger and
+     filled with the design's white-violet-cyan gradient; the rail's current row
+     keeps the 2px bar it carries on every ground and gains the design's ring
+     and glow around it; a chart bar runs cyan up into violet.
+
+     32px and not the design's 36px because the console sets its figures in
+     Geist Mono, which runs wider per glyph than the Archivo the mock used — 32
+     is where the two match in weight on a card of the same width. */
+  --figure-size: 32px;
+  --figure-image: linear-gradient(120deg, #ffffff 18%, #d8b4fe 58%, #67e8f9 100%);
+  --figure-fill: transparent;
+  --nav-active-mark:
+    inset 2px 0 0 #d8b4fe, inset 0 0 0 1px rgb(216 180 254 / 0.32),
+    0 0 24px -6px rgb(168 85 247 / 0.9);
+  --bar-image: linear-gradient(180deg, #22d3ee 0%, #a855f7 55%, #6d28d9 100%);
+
+  /* --console-bg, --sidebar, --mark, --panel, --panel-warn, --panel-glow,
+     --glow-a/b/c and --control-inset are already this ground's values on :root,
+     so it inherits its grounds and its glows rather than restating them. */
+}
+
+/* --- Porcelain: warm paper ----------------------------------------------- */
+[data-theme="porcelain"] {
+  --color-surface: #e9e5de; /* the page */
+  --color-ground: #fbfaf8; /* opaque panels, inputs, dialogs */
+  --color-surface-strong: rgb(35 31 27 / 0.045); /* hovers, insets, chips */
+  --color-deep: #e9e5de;
+  --color-deep-2: #efece6;
+
+  /* ink-subtle is #6e6860, not the design's #807a70, which lands at 3.8:1 on
+     the page. It is the colour used for table headers and the small uppercase
+     labels that are hardest to read already, so it has to clear AA. The
+     design's fourth ink step is folded into it: four text greys cannot all
+     clear 4.5:1 on a light ground — that caps relative luminance at 0.142, and
+     these three already fill it. */
+  --color-ink: #211e1a;
+  --color-ink-muted: #5c574f;
+  --color-ink-subtle: #6e6860;
+
+  --color-line: rgb(35 31 27 / 0.1);
+  --color-line-strong: rgb(35 31 27 / 0.18);
+
+  /* accent-bright is the deep navy, not the design's mid blue, because it is
+     the "legible as text" accent and the mid blue is not. */
+  --color-accent: #3f5f9e;
+  --color-accent-bright: #35507f;
+  --color-accent-soft: #e6eaf3;
+
+  /* Ink on paper, the design's primary button. */
+  --color-btn: #211e1a;
+  --color-btn-hover: #35302a;
+  --color-btn-fg: #f7f4ef;
+
+  /* The design's porcelain set, each measured against both the panel and its
+     own soft fill: 5.3:1, 4.6:1, 4.9:1. */
+  --color-pass: #2f6b54;
+  --color-pass-soft: #e3efe8;
+  --color-fail: #9e4a45;
+  --color-fail-soft: #f6e6e3;
+  --color-warn: #8a6420;
+  --color-warn-soft: #f6ecda;
+  --color-neutral: #5c574f;
+  --color-neutral-soft: rgb(35 31 27 / 0.06);
+
+  --color-code: rgb(28 26 23 / 0.05);
+
+  --console-bg: radial-gradient(120% 90% at 78% -10%, #fbf9f5 0%, #f1ede6 42%, #e7e2da 100%);
+  --sidebar: linear-gradient(180deg, rgb(255 255 255 / 0.72), rgb(255 255 255 / 0.34));
+  --mark: linear-gradient(150deg, #ffffff, #ede8e0);
+  --panel: linear-gradient(
+    155deg,
+    rgb(255 255 255 / 0.82),
+    rgb(255 255 255 / 0.46) 52%,
+    rgb(255 255 255 / 0.3)
+  );
+  --panel-warn: linear-gradient(
+    155deg,
+    rgb(246 236 219 / 0.9),
+    rgb(255 255 255 / 0.5) 55%,
+    rgb(255 255 255 / 0.34)
+  );
+
+  /* Elevation has to be re-tuned, not reused: the dark set is up to 70% black
+     because a shadow only reads on a dark ground if it is genuinely darker
+     than it. The same values on paper look like smudges. */
+  --shadow-xs: 0 1px 2px 0 rgb(35 31 27 / 0.04);
+  --shadow-sm: 0 1px 2px rgb(35 31 27 / 0.06), 0 1px 3px rgb(35 31 27 / 0.05);
+  --shadow-md: 0 4px 12px -2px rgb(35 31 27 / 0.08), 0 2px 4px -2px rgb(35 31 27 / 0.06);
+  --shadow-lg: 0 12px 32px -8px rgb(35 31 27 / 0.12), 0 4px 10px -4px rgb(35 31 27 / 0.07);
+  --shadow-panel:
+    inset 0 1px 0 rgb(255 255 255 / 0.85), 0 1px 2px rgb(35 31 27 / 0.06),
+    0 22px 50px -28px rgb(35 31 27 / 0.3);
+
+  /* The same two mechanisms, dialled right down. A glow that reads as light on
+     a dark ground reads as a stain on paper, so here the pointer response is
+     mostly a deeper cast, and the drifting field is barely a tint — enough that
+     the page is not dead, not enough to look like a gradient. */
+  --panel-base: rgb(255 255 255 / 0.62);
+  --control-inset: inset 0 1px 2px rgb(35 31 27 / 0.055);
+  --panel-glow: 0 0 0 1px rgb(63 95 158 / 0.18), 0 18px 40px -20px rgb(35 31 27 / 0.22);
+  --glow-a: radial-gradient(closest-side, rgb(63 95 158 / 0.13), transparent);
+  --glow-b: radial-gradient(closest-side, rgb(138 100 32 / 0.1), transparent);
+  --glow-c: radial-gradient(closest-side, rgb(47 107 84 / 0.09), transparent);
+
+  --btn-image: none;
+  --btn-glow: none;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* The console's wrapper covers the viewport, but the body behind it still
+     shows through an overscroll bounce and behind a `position: fixed` gap. This
+     keeps that sliver the right colour without the console layout needing to
+     reach up to <body>, which it cannot do from a nested route group. */
+  body:has([data-theme="porcelain"]) {
+    background-color: #e9e5de;
+  }
+
+  body:has([data-theme="neon"]) {
+    background-color: #06050e;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv05", "ss01";
+    /* Antialiasing matters more on a dark ground: unhinted light-on-dark text
+       renders noticeably heavier than the reverse. */
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent-bright);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: #ffffff;
+  }
+
+  /* The scrollbar is part of the page on a dark site. */
+  * {
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+
+  /* IDs, keys, amounts and token counts are read in columns; proportional
+     digits make them impossible to compare down a table. */
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* A modal <dialog> is centred by the UA with `margin: auto`. Tailwind's
+     preflight resets every element to `margin: 0`, which silently wins and
+     pins the dialog to the top-left corner — restore it here so it holds for
+     any dialog, not just the one component. */
+  dialog:modal {
+    margin: auto;
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100dvh - 2rem);
+  }
+
+  /* Neutral warm dark rather than the deep navy: every dialog in the product
+     opens over the console, and a blue veil over paper reads as a colour cast
+     rather than a dimmed page. One value serves both grounds. */
+  dialog::backdrop {
+    background-color: rgb(18 16 14 / 0.62);
+    backdrop-filter: blur(6px);
+  }
+}
+
+@layer components {
+  /* The console's card. A class rather than a utility string because the
+     design's panel is seven declarations that always travel together, and the
+     gradient behind it cannot be a Tailwind colour token. Utilities still win
+     over it — a panel that needs a different border says so in its className. */
+  .panel {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-lg);
+    background-color: var(--panel-base);
+    background-image: var(--panel);
+    box-shadow: var(--shadow-panel);
+    /* What makes the panel read as a translucent sheet rather than a flat fill:
+       the page's radial ground shows through it, softened. */
+    /* Unprefixed only. Lightning CSS adds -webkit- for the targets that need
+       it; writing both by hand made it keep the prefixed one and drop this. */
+    backdrop-filter: blur(20px) saturate(170%);
+    transition:
+      border-color 0.25s var(--ease-out-soft),
+      box-shadow 0.25s var(--ease-out-soft);
+  }
+
+  /* A glow and a brighter edge, and deliberately no movement: a pane of glass
+     catching the light is a response the whole console can afford, where a
+     lift would make every table and every stat card claim to be a link. That
+     distinction is what .lift still means. */
+  .panel:hover {
+    border-color: var(--color-line-strong);
+    box-shadow: var(--shadow-panel), var(--panel-glow);
+  }
+
+  /* For the one card whose whole job is to say "a human has to look at this". */
+  .panel-warn {
+    border-color: color-mix(in oklab, var(--color-warn) 30%, transparent);
+    background-image: var(--panel-warn);
+  }
+
+  /* The stat figure. A class rather than a utility because its size is the
+     ground's to set — Neon's figure is a third larger than Porcelain's — and a
+     utility would win over the variable. Every figure gets this one. */
+  /* A display figure is set in the SANS face, not the mono one, and the class
+     owns that rather than each caller — which is the only reason it works.
+
+     Geist Mono draws a slashed zero as its DEFAULT glyph. That was measured,
+     not assumed: `normal`, `"zero" 0`, `"ss01" 0`, ss02, ss03 and cv01 all
+     leave the slash in place, because there is no feature to switch off. In a
+     9px id a slashed zero is a useful 0-versus-O disambiguation; at 32px, as
+     the single figure on a card, it reads as an error glyph — a dashboard whose
+     four headline numbers were all zero looked like four things had gone wrong.
+     So the figure takes the sans face with tabular figures, and everything
+     smaller keeps the mono.
+
+     Callers must therefore not put `font-mono` beside `figure`: a utility wins
+     over a component class and would put the slash straight back. */
+  .figure {
+    font-family: var(--font-sans);
+    font-size: var(--figure-size);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* And the fill, which only a figure with no status to report may take: on
+     Neon that is a white-violet-cyan gradient, elsewhere it is the ink the
+     figure was already given. Split from .figure because a pass / warn / fail
+     figure has to stay one flat, recognisable colour — the gradient would
+     paint over the very thing that card exists to say.
+
+     -webkit-text-fill-color rather than `color`, so a status figure that does
+     take an ink still resolves currentColor for the arrow beside it. */
+  .figure-gradient {
+    background-image: var(--figure-image);
+    background-clip: text;
+    -webkit-text-fill-color: var(--figure-fill);
+  }
+
+  .rail {
+    background-image: var(--sidebar);
+  }
+
+  /* --- The console's ground, moving ---------------------------------------
+     Three slow colour fields drifting behind everything. Fixed rather than
+     absolute so the field belongs to the viewport and does not slide up the
+     page as you scroll — the console is one room you are moving around in, not
+     a poster you are scrolling past.
+
+     z-index: -1 puts it above the wrapper's own background and below every
+     in-flow child, which is why nothing in the console needs a z-index of its
+     own. The wrapper isolates, so the negative index cannot escape it.
+
+     The colours come from --glow-a/b/c, so this is still a token swap: on
+     Porcelain the same three spans paint a tint you have to look for. */
+  .console-glow {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  /* Each blob's centre sits outside the viewport on purpose: only its falloff
+     reaches the page. A centre inside the content column puts a bright patch
+     behind whichever panel happens to be there, and a translucent panel
+     transmits it — so the first card looked highlighted and the same panel
+     looked like two different colours at the top and bottom of a page. */
+  .console-glow > span {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(104px);
+    will-change: transform, opacity;
+    animation: var(--animate-aurora);
+  }
+
+  .console-glow > span:nth-child(1) {
+    inset: -34% auto auto -26%;
+    width: 48rem;
+    height: 36rem;
+    background-image: var(--glow-a);
+  }
+
+  .console-glow > span:nth-child(2) {
+    inset: -30% -28% auto auto;
+    width: 44rem;
+    height: 34rem;
+    background-image: var(--glow-b);
+    animation-delay: -7s;
+  }
+
+  .console-glow > span:nth-child(3) {
+    inset: auto auto -22% 26%;
+    width: 38rem;
+    height: 26rem;
+    background-image: var(--glow-c);
+    animation-delay: -13s;
+  }
+
+  /* Every child of the console's <main> arrives, in order, once per navigation.
+     A separate class from .rise so the reduced-motion block can neutralise the
+     stagger without touching the one-shot entrances components fire themselves.
+     Six delays is enough: past that a page is a list, and a list that deals
+     itself out like a hand of cards is slower to read, not livelier. */
+  .stagger > * {
+    animation: rise 520ms var(--ease-out-soft) both;
+  }
+
+  .stagger > *:nth-child(2) {
+    animation-delay: 55ms;
+  }
+
+  .stagger > *:nth-child(3) {
+    animation-delay: 110ms;
+  }
+
+  .stagger > *:nth-child(4) {
+    animation-delay: 165ms;
+  }
+
+  .stagger > *:nth-child(5) {
+    animation-delay: 220ms;
+  }
+
+  .stagger > *:nth-child(n + 6) {
+    animation-delay: 275ms;
+  }
+
+  /* The shine that crosses a primary button under the pointer, and the cast it
+     sits on. Outside the console --btn-image and --btn-glow are unset, so the
+     button keeps the flat fill it always had and only gains the sweep. */
+  .btn-primary {
+    position: relative;
+    overflow: hidden;
+    background-image: var(--btn-image);
+    box-shadow: var(--btn-glow, var(--shadow-xs));
+  }
+
+  .btn-primary::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: linear-gradient(
+      100deg,
+      transparent 24%,
+      rgb(255 255 255 / 0.26) 50%,
+      transparent 76%
+    );
+    transform: translateX(-130%);
+    transition: transform 0.65s var(--ease-out-soft);
+  }
+
+  .btn-primary:hover::after {
+    transform: translateX(130%);
+  }
+
+  /* The chip behind the console's lens mark: the ground's own tone, so the mark
+     belongs to the console rather than sitting on it. */
+  .mark {
+    background-image: var(--mark);
+  }
+
+  /* --- The playground's run stage -----------------------------------------
+     Motion for a job that is actually running, so it splits in two by what it
+     is allowed to claim.
+
+     AMBIENT motion (the sweep, the halo, the LED) says "work is happening".
+     It loops on a CSS animation and is deliberately NOT tied to a number:
+     nothing reports how far through a stage the pipeline is, and a bar
+     creeping to 90% would be inventing that.
+
+     DISCRETE motion (a word arriving, a check stamping, a dot filling) fires
+     once per real event — a step row appearing in the trace. Those are keyed
+     on data in the component and only enter here for the shape of the
+     entrance. */
+
+  /* Travels down the document card while a stage the user cannot see through
+     is running. A loop, because it is a heartbeat and not a progress bar. */
+  .stage-sweep {
+    animation: stage-sweep 1.9s var(--ease-out-soft) infinite;
+  }
+
+  /* Breathes behind the card, tinted per phase by the component. */
+  .stage-halo {
+    animation: stage-halo 4.5s ease-in-out infinite;
+  }
+
+  /* One-shot entrances. The fill mode is both, so the element holds the
+     from-state before it starts and the to-state after — a staggered list
+     must not flash at full opacity on the frame before its delay elapses. */
+  .rise {
+    animation: rise 480ms var(--ease-out-soft) both;
+  }
+
+  /* The verdict arriving. Scale rather than slide: it is the answer, so it
+     settles in place instead of travelling in from somewhere. */
+  .land {
+    animation: land 520ms var(--ease-out-soft) both;
+  }
+
+  /* A chart bar rising into place. The origin is what makes it grow rather
+     than drop, and scaleY means the keyframe needs no height. */
+  .bar-grow {
+    transform-origin: bottom;
+    animation: bar-grow 620ms var(--ease-out-soft) both;
+  }
+
+  /* A check result being stamped onto the document. Overshoots, because a
+     stamp is a physical gesture. */
+  .stamp {
+    animation: stamp 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* The stage still renders and still tells the truth about the job; it just
+       stops moving. Entrances resolve to their end state rather than to
+       nothing, or the result would never appear at all. */
+    .stage-sweep,
+    .stage-halo {
+      animation: none !important;
+    }
+
+    .rise,
+    .land,
+    .stamp,
+    .bar-grow,
+    .stagger > * {
+      animation-duration: 1ms !important;
+      animation-delay: 0ms !important;
+    }
+
+    /* The field is the one piece of pure decoration here, so it simply stops.
+       Its spans still paint, which is what keeps the ground from going flat. */
+    .console-glow > span {
+      animation: none !important;
+    }
+
+    .btn-primary::after {
+      transition: none;
+    }
+  }
+
+  /* Cards that respond to the pointer. The lift is small on purpose — it should
+     register as "this is interactive", not as an animation. */
+  .lift {
+    transition:
+      transform 0.18s var(--ease-out-soft),
+      box-shadow 0.18s var(--ease-out-soft),
+      border-color 0.18s var(--ease-out-soft);
+  }
+
+  .lift:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-line-strong);
+    box-shadow: var(--shadow-md);
+  }
+
+  .grid-field-deep {
+    background-image:
+      linear-gradient(to right, rgb(232 238 251 / 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(232 238 251 / 0.06) 1px, transparent 1px);
+    background-size: 3.5rem 3.5rem;
+    mask-image: radial-gradient(70rem 36rem at 50% 30%, #000 35%, transparent 80%);
+  }
+
+  /* --- Marketing: the vivid, animated surface ------------------------- */
+
+  /* Three slow-drifting colour fields. The whole "alive" feeling of the hero
+     is this and nothing else, so it stays GPU-cheap: transform and opacity. */
+  .aurora-field::before,
+  .aurora-field::after,
+  .aurora-field > .aurora-third {
+    content: "";
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(90px);
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+
+  .aurora-field::before {
+    inset: -18% auto auto -12%;
+    width: 44rem;
+    height: 34rem;
+    background: radial-gradient(closest-side, rgb(99 102 241 / 0.55), transparent);
+    animation: var(--animate-aurora);
+  }
+
+  .aurora-field::after {
+    inset: -12% -14% auto auto;
+    width: 40rem;
+    height: 32rem;
+    background: radial-gradient(closest-side, rgb(168 85 247 / 0.42), transparent);
+    animation: var(--animate-aurora);
+    animation-delay: -7s;
+  }
+
+  .aurora-field > .aurora-third {
+    inset: auto auto -22% 28%;
+    width: 38rem;
+    height: 26rem;
+    background: radial-gradient(closest-side, rgb(34 211 238 / 0.34), transparent);
+    animation: var(--animate-aurora);
+    animation-delay: -13s;
+  }
+
+  .text-gradient {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-viv-sky),
+      var(--color-viv-indigo) 42%,
+      var(--color-viv-violet)
+    );
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Scroll-in reveal. The class is added by an IntersectionObserver so the
+     motion fires once, when the section is actually looked at. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.7s var(--ease-out-soft),
+      transform 0.7s var(--ease-out-soft);
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* The travelling pulse along the "how it works" connector. */
+  .beam-line {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .beam-line::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-viv-cyan),
+      var(--color-viv-indigo),
+      transparent
+    );
+    animation: var(--animate-beam);
+  }
+
+  .float-slow {
+    animation: var(--animate-float);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lift {
+      transition: none;
+    }
+    .lift:hover {
+      transform: none;
+    }
+    .aurora-field::before,
+    .aurora-field::after,
+    .aurora-field > .aurora-third,
+    .beam-line::after,
+    .float-slow {
+      animation: none !important;
+    }
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+}
+
+/* Documentation body copy. A stylesheet rather than a set of wrapper
+   components so doc pages stay plain semantic HTML. */
+@layer components {
+  .doc-prose {
+    color: var(--color-ink);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+  }
+
+  .doc-prose > * + * {
+    margin-top: 1rem;
+  }
+
+  .doc-prose h1 {
+    font-size: 1.875rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .doc-prose h2 {
+    margin-top: 2.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    scroll-margin-top: 5rem;
+  }
+
+  .doc-prose h3 {
+    margin-top: 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    scroll-margin-top: 5rem;
+  }
+
+  .doc-prose h1 + p {
+    color: var(--color-ink-muted);
+    font-size: 1rem;
+  }
+
+  .doc-prose a {
+    color: var(--color-accent-bright);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .doc-prose ul,
+  .doc-prose ol {
+    padding-left: 1.25rem;
+    display: grid;
+    gap: 0.375rem;
+  }
+
+  .doc-prose ul {
+    list-style: disc;
+  }
+
+  .doc-prose ol {
+    list-style: decimal;
+  }
+
+  .doc-prose li::marker {
+    color: var(--color-ink-subtle);
+  }
+
+  .doc-prose code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background-color: var(--color-surface-strong);
+    border-radius: var(--radius-sm);
+    padding: 0.1em 0.35em;
+  }
+
+  .doc-prose pre code {
+    background-color: transparent;
+    padding: 0;
+  }
+
+  .doc-prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    display: block;
+    overflow-x: auto;
+  }
+
+  .doc-prose th,
+  .doc-prose td {
+    border: 1px solid var(--color-line);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .doc-prose th {
+    background-color: var(--color-surface);
+    font-weight: 600;
+  }
+
+  .doc-prose strong {
+    font-weight: 600;
+  }
+}
