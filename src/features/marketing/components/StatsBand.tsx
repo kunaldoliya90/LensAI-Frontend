@@ -7,7 +7,7 @@ import { Reveal } from "@/components/ui/Reveal";
 const STATS = [
   { value: "7", unit: "delivery attempts", note: "over roughly 12 hours, then replayable" },
   { value: "20", unit: "documents per job", note: "ordered; first non-empty value wins" },
-  { value: "50", unit: "MB per upload", note: "PDF, PNG, JPEG or WebP" },
+  { value: "50", unit: "MB per document", note: "PDF, PNG, JPEG or WebP" },
   { value: "3,000", unit: "requests / minute", note: "per key, at the high tier" },
 ];
 

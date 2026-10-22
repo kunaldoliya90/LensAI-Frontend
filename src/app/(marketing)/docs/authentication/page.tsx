@@ -35,8 +35,7 @@ export default function AuthenticationPage() {
               <code>x-api-key: {"{plaintext_key}"}</code>
             </td>
             <td>
-              <code>/verifications*</code>, <code>/documents*</code>, <code>/templates</code>,{" "}
-              <code>/portal/whoami</code>
+              <code>/verifications*</code>, <code>/templates</code>, <code>/portal/whoami</code>
             </td>
           </tr>
           <tr>

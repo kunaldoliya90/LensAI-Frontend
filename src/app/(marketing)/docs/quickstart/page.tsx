@@ -6,7 +6,7 @@ import { API_ROOT } from "@/lib/api/config";
 
 export const metadata: Metadata = {
   title: "Quickstart",
-  description: "First key, first upload, first verification — in the order they have to happen.",
+  description: "First key, first document, first verification — in the order they have to happen.",
 };
 
 export default function QuickstartPage() {
@@ -14,7 +14,7 @@ export default function QuickstartPage() {
     <>
       <h1>Quickstart</h1>
       <p>
-        Five steps from an empty account to a verdict. Everything after step 2 runs from your
+        Four steps from an empty account to a verdict. Everything after step 2 runs from your
         backend with an <code>x-api-key</code>; steps 1 and 2 happen once, in the console.
       </p>
 
@@ -22,9 +22,9 @@ export default function QuickstartPage() {
       <p>
         <Link href="/signup">Sign up</Link> to create your tenant and its first user. Then create a
         <strong> client</strong> on <Link href="/app/clients">Clients</Link>. A client is the entity
-        a job belongs to — your own customer, subsidiary or business unit. Every upload, webhook
-        endpoint and verification hangs off a <code>client_id</code>, so nothing else works until
-        one exists.
+        a job belongs to — your own customer, subsidiary or business unit. Every webhook endpoint
+        and verification hangs off a <code>client_id</code>, so nothing else works until one
+        exists.
       </p>
 
       <h2>2. Request an API key</h2>
@@ -48,32 +48,12 @@ export default function QuickstartPage() {
 
 # {"tenant_id":"…","api_key_id":"…","environment":"SANDBOX","rate_limit_tier":"sandbox"}`}</CodeBlock>
 
-      <h2>3. Upload the document</h2>
+      <h2>3. Submit the verification</h2>
       <p>
-        Send the bytes. The format is decided from the file&rsquo;s own leading bytes, not its
-        extension or the <code>Content-Type</code> your HTTP library guessed.
+        A document is submitted as a URL we fetch once, at processing time — see{" "}
+        <Link href="/docs/uploading">Submitting documents</Link> for what that URL can be (an S3
+        URL, a presigned URL, a Google Drive link) and the safety checks we run against it.
       </p>
-
-      <CodeBlock language="bash">{`curl -X POST ${API_ROOT}/documents \\
-  -H "x-api-key: $LENSAI_API_KEY" \\
-  -F "client_id=$LENSAI_CLIENT_ID" \\
-  -F "file=@challan-april-2026.pdf"
-
-# 201
-# {
-#   "document_id": "7c1f9b2e-0000-4000-8000-000000000000",
-#   "content_type": "application/pdf",
-#   "size_bytes": 184213,
-#   "sha256": "9f2c1a7b…",
-#   "expires_at": "2026-09-12T09:14:22.481+00:00"
-# }`}</CodeBlock>
-
-      <p>
-        Accepted: PDF, PNG, JPEG, WebP, up to 50 MB. See{" "}
-        <Link href="/docs/uploading">Uploading documents</Link> for the URL alternative.
-      </p>
-
-      <h2>4. Submit the verification</h2>
       <p>
         <code>expected_values</code> is what you believe the document says. Each key is compared
         field by field against what was extracted; a key you omit is reported{" "}
@@ -89,7 +69,7 @@ export default function QuickstartPage() {
     "client_id": "'$LENSAI_CLIENT_ID'",
     "template": "challan",
     "documents": [
-      {"type": "document_id", "document_id": "7c1f9b2e-0000-4000-8000-000000000000"}
+      {"type": "url", "url": "https://your-bucket.example.com/challan-april-2026.pdf?sig=..."}
     ],
     "expected_values": {
       "company_name": "Acme India Pvt. Ltd.",
@@ -106,7 +86,7 @@ export default function QuickstartPage() {
         result and in the webhook, and it is how you join our answer to your row.
       </p>
 
-      <h2>5. Take the result</h2>
+      <h2>4. Take the result</h2>
       <p>
         The verdict arrives as a signed <code>verification.completed</code> webhook, and is always
         retrievable regardless of what happened to that delivery:
@@ -123,8 +103,8 @@ export default function QuickstartPage() {
       <h2>Try it without writing code</h2>
       <p>
         The <Link href="/app/playground">Playground</Link> runs all of the above with a key you
-        paste into the browser: upload, submit, poll, and read the per-plugin trace. The key is kept
-        in <code>sessionStorage</code> and is never sent to LensAI&rsquo;s own servers as anything
+        paste into the browser: submit, poll, and read the per-plugin trace. The key is kept in{" "}
+        <code>sessionStorage</code> and is never sent to LensAI&rsquo;s own servers as anything
         other than the <code>x-api-key</code> header on those calls.
       </p>
     </>

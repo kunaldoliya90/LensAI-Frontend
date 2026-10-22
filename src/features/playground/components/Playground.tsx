@@ -10,12 +10,10 @@ import { ClientSelect } from "@/features/clients/components/ClientSelect";
 import { useUrlParams } from "@/hooks/useUrlParams";
 import { isStaff } from "@/lib/auth/session";
 import { usePlaygroundApiKey, useSession } from "@/lib/auth/useSession";
-import type { DocumentUploaded } from "@/lib/api/types";
 import { getVerification, whoami } from "../api/playground";
 import { IN_PROGRESS } from "../runPhases";
 import { PlaygroundKeyPanel } from "./PlaygroundKeyPanel";
 import { SubmitVerificationForm } from "./SubmitVerificationForm";
-import { UploadDocumentPanel } from "./UploadDocumentPanel";
 import { VerificationListPanel } from "./VerificationListPanel";
 import { VerificationResultPanel } from "./VerificationResultPanel";
 
@@ -27,7 +25,6 @@ export function Playground() {
   const clientId = params.get("client") ?? "";
   const verificationId = params.get("verification");
 
-  const [uploads, setUploads] = useState<DocumentUploaded[]>([]);
   const [wasReplay, setWasReplay] = useState<boolean | null>(null);
 
   const identity = useQuery({
@@ -77,7 +74,7 @@ export function Playground() {
     <>
       <PageHeader
         title="Playground"
-        description="Run the verification API end to end from the browser: upload, submit, poll, and read the trace behind a verdict."
+        description="Run the verification API end to end from the browser: paste a document URL, submit, poll, and read the trace behind a verdict."
       />
 
       {setupOpen || apiKey === null ? (
@@ -113,8 +110,8 @@ export function Playground() {
 
       {apiKey !== null && identity.isError ? (
         <Callout tone="warn" title="The rest of the playground is locked">
-          Until this key authenticates, no upload or submission can succeed. Fix the key above, then
-          test again.
+          Until this key authenticates, no submission can succeed. Fix the key above, then test
+          again.
         </Callout>
       ) : null}
 
@@ -128,7 +125,7 @@ export function Playground() {
                 <ClientSelect
                   value={clientId}
                   required
-                  hint="Uploads and verifications both carry a client_id, and a document uploaded for one client cannot be submitted under another."
+                  hint="Every verification carries a client_id."
                   onChange={(value) => setParams({ client: value || null })}
                 />
               </div>
@@ -136,27 +133,17 @@ export function Playground() {
               {clientId === "" ? (
                 <EmptyState
                   title="Select a client"
-                  description="Every upload and every verification belongs to one of your clients."
+                  description="Every verification belongs to one of your clients."
                 />
               ) : (
-                <>
-                  <UploadDocumentPanel
-                    apiKey={apiKey}
-                    clientId={clientId}
-                    uploads={uploads}
-                    onUploaded={(document) => setUploads((current) => [...current, document])}
-                  />
-
-                  <SubmitVerificationForm
-                    apiKey={apiKey}
-                    clientId={clientId}
-                    uploads={uploads}
-                    onSubmitted={(id, replay) => {
-                      setWasReplay(replay);
-                      setParams({ verification: id });
-                    }}
-                  />
-                </>
+                <SubmitVerificationForm
+                  apiKey={apiKey}
+                  clientId={clientId}
+                  onSubmitted={(id, replay) => {
+                    setWasReplay(replay);
+                    setParams({ verification: id });
+                  }}
+                />
               )}
             </>
           ) : null}

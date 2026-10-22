@@ -7,22 +7,22 @@ const POINTS = [
     icon: Link2Off,
     accent: "text-viv-sky",
     ring: "group-hover:border-viv-sky/40",
-    title: "No public URL for a challan",
-    body: "Publishing compliance evidence at a fetchable address — even briefly, even behind an unguessable URL — is the objection that stops security reviews. Upload the bytes instead and no fetch ever happens.",
+    title: "Fetched once, never stored",
+    body: "Your document is fetched a single time, at processing time, over a connection that refuses private, loopback and cloud-metadata addresses. We never write the bytes to storage of our own.",
   },
   {
     icon: Clock,
     accent: "text-viv-violet",
     ring: "group-hover:border-viv-violet/40",
     title: "The file leaves; the answer stays",
-    body: "Documents are removed at expires_at by a retention sweep. Verdicts, extracted fields and per-field check results outlive them, so a record from last year still explains itself.",
+    body: "There is nothing to expire, because there is never a copy to begin with. Verdicts, extracted fields and per-field check results are what we keep, so a record from last year still explains itself.",
   },
   {
     icon: EyeOff,
     accent: "text-viv-emerald",
     ring: "group-hover:border-viv-emerald/40",
-    title: "We do not serve the bytes back",
-    body: "GET /documents/{id} returns metadata only. LensAI holds your documents to verify them, not to distribute them, so it never becomes a second copy of your evidence store.",
+    title: "No second copy of your evidence store",
+    body: "LensAI holds nothing of yours to serve back, upload or otherwise. We verify a document once and keep the answer, not a copy of the file.",
   },
 ];
 

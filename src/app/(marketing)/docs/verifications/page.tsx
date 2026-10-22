@@ -26,7 +26,7 @@ export default function VerificationsPage() {
   "client_id": "d894f2a1-0000-4000-8000-000000000000",
   "template": "challan",
   "documents": [
-    {"type": "document_id", "document_id": "7c1f9b2e-…"}
+    {"type": "url", "url": "https://your-bucket.example.com/challan.pdf?sig=…"}
   ],
   "expected_values": {
     "company_name": "Acme India Pvt. Ltd.",
@@ -73,8 +73,7 @@ export default function VerificationsPage() {
               <code>documents</code>
             </td>
             <td>
-              1–20 entries, each <code>{'{"type":"url","url":…}'}</code> or{" "}
-              <code>{'{"type":"document_id","document_id":…}'}</code>. Order matters.
+              1–20 entries, each <code>{'{"type":"url","url":…}'}</code>. Order matters.
             </td>
           </tr>
           <tr>

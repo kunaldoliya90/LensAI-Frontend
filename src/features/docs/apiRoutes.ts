@@ -90,32 +90,6 @@ export const API_ROUTES: ApiRouteGroup[] = [
     ],
   },
   {
-    heading: "Documents",
-    routes: [
-      {
-        method: "POST",
-        path: "/documents",
-        credential: "x-api-key",
-        returns: "201 DocumentUploaded",
-        summary: "Multipart upload: file, client_id, optional doc_type.",
-      },
-      {
-        method: "GET",
-        path: "/documents/{document_id}",
-        credential: "x-api-key",
-        returns: "DocumentUploaded",
-        summary: "Metadata only — never the bytes.",
-      },
-      {
-        method: "DELETE",
-        path: "/documents/{document_id}",
-        credential: "x-api-key",
-        returns: "204",
-        summary: "Refused once a verification cites the document.",
-      },
-    ],
-  },
-  {
     heading: "Clients and keys",
     routes: [
       {

@@ -4,7 +4,7 @@ import { buttonClass } from "@/components/ui/Button";
 import { VerdictRunShowcase } from "./VerdictRunShowcase";
 
 const FACTS = [
-  { icon: FileCheck2, text: "Upload the bytes, or pass a URL" },
+  { icon: FileCheck2, text: "Submit a document by URL" },
   { icon: ShieldCheck, text: "Signed, at-least-once delivery" },
   { icon: Webhook, text: "Polling fallback, always" },
 ];

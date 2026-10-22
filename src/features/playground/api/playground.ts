@@ -1,6 +1,5 @@
 import { apiRequest, apiRequestDetailed } from "@/lib/api/client";
 import type {
-  DocumentUploaded,
   JobStatus,
   NatureAvailable,
   VerificationAccepted,
@@ -17,34 +16,12 @@ import type {
  * read verifications, so this whole surface is keyed on a key the user pastes.
  */
 
-const UPLOAD_TIMEOUT_MS = 180_000;
-
 export function whoami(apiKey: string): Promise<WhoAmIResponse> {
   return apiRequest<WhoAmIResponse>("/portal/whoami", { auth: "apikey", apiKey });
 }
 
 export function listSubmittableNatures(apiKey: string): Promise<NatureAvailable[]> {
   return apiRequest<NatureAvailable[]>("/natures", { auth: "apikey", apiKey });
-}
-
-export function uploadDocument(input: {
-  apiKey: string;
-  clientId: string;
-  file: File;
-  docType?: string;
-}): Promise<DocumentUploaded> {
-  const form = new FormData();
-  form.append("file", input.file);
-  form.append("client_id", input.clientId);
-  if (input.docType) form.append("doc_type", input.docType);
-
-  return apiRequest<DocumentUploaded>("/documents", {
-    method: "POST",
-    auth: "apikey",
-    apiKey: input.apiKey,
-    form,
-    timeoutMs: UPLOAD_TIMEOUT_MS,
-  });
 }
 
 export async function submitVerification(input: {

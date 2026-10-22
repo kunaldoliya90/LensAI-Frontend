@@ -343,24 +343,14 @@ export interface UsageReport {
   totals: UsageLine | null;
 }
 
-// --- Documents ------------------------------------------------------------
-
-export interface DocumentUploaded {
-  document_id: string;
-  client_id: string;
-  file_name: string;
-  content_type: string;
-  size_bytes: number;
-  sha256: string;
-  uploaded_at: string;
-  expires_at: string;
-}
-
 // --- Verifications --------------------------------------------------------
 
-export type DocumentInput =
-  | { type: "url"; url: string; file_name?: string; doc_type?: string }
-  | { type: "document_id"; document_id: string; file_name?: string; doc_type?: string };
+export interface DocumentInput {
+  type: "url";
+  url: string;
+  file_name?: string;
+  doc_type?: string;
+}
 
 export interface VerificationSubmit {
   reference_id: string;

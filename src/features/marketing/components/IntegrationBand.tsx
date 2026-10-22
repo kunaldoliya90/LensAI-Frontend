@@ -8,7 +8,7 @@ const SUBMIT = `curl -X POST $LENSAI/verifications \\
   -d '{
     "reference_id": "EVD233_19_883",
     "template": "challan",
-    "documents": [{"type": "document_id", …}],
+    "documents": [{"type": "url", "url": "https://…"}],
     "expected_values": {
       "company_name": "Acme India Pvt. Ltd.",
       "challan_amount": "45200"

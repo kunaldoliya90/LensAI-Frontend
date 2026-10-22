@@ -8,9 +8,9 @@ const STEPS = [
     icon: FileUp,
     accent: "from-viv-sky to-viv-cyan",
     title: "Send the document",
-    body: "Upload the bytes to POST /documents and submit the handle, or pass a pre-signed URL we fetch once. Nothing of yours has to be publicly reachable.",
+    body: "Pass a URL — S3, a presigned link, a Google Drive share — and we fetch it once at processing time. Nothing of yours sits in our storage.",
     href: "/docs/uploading",
-    linkLabel: "Upload vs URL",
+    linkLabel: "Submitting documents",
   },
   {
     icon: SquareCheckBig,

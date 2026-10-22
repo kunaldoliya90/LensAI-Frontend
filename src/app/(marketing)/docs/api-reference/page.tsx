@@ -116,9 +116,9 @@ export default function ApiReferencePage() {
       <h2>Conventions</h2>
       <ul>
         <li>
-          <strong>Content type.</strong> <code>application/json</code> everywhere except{" "}
-          <code>POST /documents</code>, which is <code>multipart/form-data</code>. Do not set the
-          multipart <code>Content-Type</code> by hand — the boundary has to match the body.
+          <strong>Content type.</strong> <code>application/json</code> everywhere. Documents are
+          never uploaded as bytes — every request body is JSON, including a submitted document,
+          which is a URL.
         </li>
         <li>
           <strong>Pagination.</strong> <code>next_cursor</code> is opaque. Pass it back verbatim as{" "}

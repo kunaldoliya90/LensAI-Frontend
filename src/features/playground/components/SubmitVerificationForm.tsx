@@ -5,11 +5,10 @@ import { useState } from "react";
 import { ErrorNotice } from "@/components/ErrorNotice";
 import { Button } from "@/components/ui/Button";
 import { Callout } from "@/components/ui/Callout";
-import { Checkbox } from "@/components/ui/Checkbox";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
-import type { DocumentInput, DocumentUploaded } from "@/lib/api/types";
+import type { DocumentInput } from "@/lib/api/types";
 import { parseJsonObject } from "@/lib/json";
 import { listSubmittableNatures, submitVerification } from "../api/playground";
 import { ExpectedValuesFields } from "./ExpectedValuesFields";
@@ -19,17 +18,14 @@ const MAX_DOCUMENTS = 20;
 export function SubmitVerificationForm({
   apiKey,
   clientId,
-  uploads,
   onSubmitted,
 }: {
   apiKey: string;
   clientId: string;
-  uploads: DocumentUploaded[];
   onSubmitted: (verificationId: string, wasReplay: boolean) => void;
 }) {
   const [referenceId, setReferenceId] = useState("");
   const [natureName, setNatureName] = useState("");
-  const [excludedUploads, setExcludedUploads] = useState<string[]>([]);
   const [urlsText, setUrlsText] = useState("");
   const [expectedValues, setExpectedValues] = useState<Record<string, string>>({});
   const [idempotencyKey, setIdempotencyKey] = useState("");
@@ -43,20 +39,14 @@ export function SubmitVerificationForm({
 
   const selected = natures.data?.find((nature) => nature.name === natureName);
 
-  const documents: DocumentInput[] = [
-    ...uploads
-      .filter((upload) => !excludedUploads.includes(upload.document_id))
-      .map<DocumentInput>((upload) => ({
-        type: "document_id",
-        document_id: upload.document_id,
-        file_name: upload.file_name,
-      })),
-    ...urlsText
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map<DocumentInput>((url) => ({ type: "url", url })),
-  ];
+  // TODO: DocumentInput's url variant also accepts file_name/doc_type per
+  // entry, but this textarea only captures bare URLs. Worth a structured
+  // per-URL input in a future pass.
+  const documents: DocumentInput[] = urlsText
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map<DocumentInput>((url) => ({ type: "url", url }));
 
   const metadata = metadataText.trim() ? parseJsonObject(metadataText) : null;
   const metadataError = metadata && !metadata.ok ? metadata.error : undefined;
@@ -145,34 +135,6 @@ export function SubmitVerificationForm({
             Order matters: where two documents disagree about a field, the first non-empty value
             wins. Up to {MAX_DOCUMENTS} per verification.
           </p>
-
-          {uploads.length === 0 ? (
-            <p className="text-[13px] text-ink-muted">
-              Nothing uploaded in this session yet. You can still submit a URL below.
-            </p>
-          ) : (
-            uploads.map((upload) => (
-              <Checkbox
-                key={upload.document_id}
-                checked={!excludedUploads.includes(upload.document_id)}
-                onChange={(event) =>
-                  setExcludedUploads((current) =>
-                    event.target.checked
-                      ? current.filter((id) => id !== upload.document_id)
-                      : [...current, upload.document_id],
-                  )
-                }
-                label={
-                  <span>
-                    {upload.file_name}{" "}
-                    <code className="font-mono text-[12px] text-ink-muted">
-                      {upload.document_id.slice(0, 8)}…
-                    </code>
-                  </span>
-                }
-              />
-            ))
-          )}
 
           <Textarea
             label="Document URLs"
