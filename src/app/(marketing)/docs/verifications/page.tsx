@@ -24,7 +24,7 @@ export default function VerificationsPage() {
       <CodeBlock language="json">{`{
   "reference_id": "EVD233_19_883",
   "client_id": "d894f2a1-0000-4000-8000-000000000000",
-  "template": "challan",
+  "nature": 821630,
   "documents": [
     {"type": "url", "url": "https://your-bucket.example.com/challan.pdf?sig=…"}
   ],
@@ -34,7 +34,20 @@ export default function VerificationsPage() {
   },
   "callback_url": "https://acme.example.com/webhooks/lensai",
   "priority": 100,
-  "metadata": {"your_row_id": 42}
+  "metadata": {"your_row_id": 42},
+  "context": {
+    "submitted_by": {"name": "Ananya Rao", "email": "ananya@acme.example.com"},
+    "approver": {"name": "Deepa Menon", "email": "deepa@acme.example.com"},
+    "record": {
+      "title": "PF monthly contribution (ECR challan)",
+      "act": "EPF & MP Act, 1952",
+      "criticality": "HIGH",
+      "department": "HR",
+      "location": "Mumbai",
+      "entity": "Acme India Pvt. Ltd.",
+      "period": "Oct 2026"
+    }
+  }
 }`}</CodeBlock>
 
       <table>
@@ -58,14 +71,15 @@ export default function VerificationsPage() {
             <td>
               <code>client_id</code>
             </td>
-            <td>Required UUID. Must own every document in the array.</td>
+            <td>Required UUID. One of your clients.</td>
           </tr>
           <tr>
             <td>
-              <code>template</code>
+              <code>nature</code>
             </td>
             <td>
-              Required, the document type — e.g. <code>challan</code>. Must have an ACTIVE version.
+              Required integer: the document type&rsquo;s <code>code</code> from{" "}
+              <code>GET /natures</code>. Must have an ACTIVE version.
             </td>
           </tr>
           <tr>
@@ -103,18 +117,34 @@ export default function VerificationsPage() {
             </td>
             <td>Opaque passthrough, echoed in the webhook and the result.</td>
           </tr>
+          <tr>
+            <td>
+              <code>context</code>
+            </td>
+            <td>
+              Optional, validated. Who submitted what, in your tool&rsquo;s terms:{" "}
+              <code>submitted_by</code> (<code>email</code> required, <code>name</code>,{" "}
+              <code>external_id</code>), optional <code>approver</code>, and <code>record</code>{" "}
+              (<code>title</code>, <code>act</code>, <code>nature_label</code>,{" "}
+              <code>criticality</code> HIGH | MEDIUM | LOW, <code>department</code>,{" "}
+              <code>location</code>, <code>entity</code>, <code>period</code>,{" "}
+              <code>due_date</code>), plus <code>submitted_at</code>. Unknown keys are rejected.
+              Never compared against the document — it powers the Insights dashboards and
+              per-user reports. Echoed back in the result.
+            </td>
+          </tr>
         </tbody>
       </table>
 
       <p>
-        Which keys a template actually compares is not a guess:{" "}
-        <code>GET /templates</code> (with the API key) returns each available template and its{" "}
-        <code>expects</code> array.
+        Which keys a document type actually compares is not a guess:{" "}
+        <code>GET /natures</code> (with the API key) returns each available nature, its{" "}
+        <code>code</code> and its <code>expects</code> array.
       </p>
 
-      <CodeBlock language="bash">{`curl ${API_ROOT}/templates -H "x-api-key: $LENSAI_API_KEY"
+      <CodeBlock language="bash">{`curl ${API_ROOT}/natures -H "x-api-key: $LENSAI_API_KEY"
 
-# [{"name":"challan","version":1,
+# [{"code":821630,"name":"challan","label":"Challan","version":1,
 #   "expects":["authority","challan_amount","challan_date","challan_period","company_name","state"]}]`}</CodeBlock>
 
       <h2>Idempotency</h2>

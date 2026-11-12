@@ -13,6 +13,10 @@ import { createClient } from "../api/clients";
 const schema = z.object({
   name: z.string().trim().min(1, "Give the client a name").max(255),
   contact_email: z.union([z.email("Enter a valid email address"), z.literal("")]),
+  monthly_quota: z.union([
+    z.literal(""),
+    z.string().regex(/^[1-9]\d{0,6}$/, "A whole number of verifications, 1 or more"),
+  ]),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -21,7 +25,7 @@ export function CreateClientDialog({ open, onClose }: { open: boolean; onClose: 
   const queryClient = useQueryClient();
   const { register, handleSubmit, formState, reset } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", contact_email: "" },
+    defaultValues: { name: "", contact_email: "", monthly_quota: "" },
   });
 
   const mutation = useMutation({
@@ -37,6 +41,7 @@ export function CreateClientDialog({ open, onClose }: { open: boolean; onClose: 
     mutation.mutateAsync({
       name: values.name,
       contact_email: values.contact_email || undefined,
+      monthly_quota: values.monthly_quota ? Number(values.monthly_quota) : undefined,
     }),
   );
 
@@ -45,7 +50,7 @@ export function CreateClientDialog({ open, onClose }: { open: boolean; onClose: 
       open={open}
       onClose={onClose}
       title="Create a client"
-      description="A client is the entity a job belongs to. Every upload, webhook endpoint and verification references its client_id."
+      description="A client is the entity a job belongs to — typically one compliance tool or company. Every webhook endpoint and verification references its client_id."
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>
@@ -74,6 +79,15 @@ export function CreateClientDialog({ open, onClose }: { open: boolean; onClose: 
           hint="Optional. LensAI does not email this address; it is your own record of who owns the account."
           error={formState.errors.contact_email?.message}
           {...register("contact_email")}
+        />
+
+        <Input
+          label="Monthly plan"
+          inputMode="numeric"
+          placeholder="e.g. 500"
+          hint="Optional. Verifications per month you expect from this client, shown against actual use on the Usage page."
+          error={formState.errors.monthly_quota?.message}
+          {...register("monthly_quota")}
         />
       </form>
     </Modal>

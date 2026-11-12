@@ -85,6 +85,8 @@ export interface ClientSummary {
   tenant_id: string;
   name: string;
   contact_email: string | null;
+  /** Planned verifications per month, shown on the Usage dashboard. */
+  monthly_quota?: number | null;
   created_at: string;
 }
 
@@ -362,6 +364,34 @@ export interface VerificationSubmit {
   callback_url?: string;
   priority?: number;
   metadata?: Record<string, unknown>;
+  context?: VerificationContext;
+}
+
+export type Criticality = "HIGH" | "MEDIUM" | "LOW";
+
+export interface ContextPerson {
+  name?: string | null;
+  email?: string | null;
+  external_id?: string | null;
+}
+
+/** Who submitted what, in the caller's own terms. Display and grouping only —
+ *  nothing here is compared against the document. */
+export interface VerificationContext {
+  submitted_by: ContextPerson & { email: string };
+  approver?: ContextPerson | null;
+  record?: {
+    title?: string | null;
+    act?: string | null;
+    nature_label?: string | null;
+    criticality?: Criticality | null;
+    department?: string | null;
+    location?: string | null;
+    entity?: string | null;
+    period?: string | null;
+    due_date?: string | null;
+  };
+  submitted_at?: string | null;
 }
 
 export interface NatureRef {
@@ -381,6 +411,8 @@ export interface VerificationAccepted {
 
 export interface CheckResult {
   field_name: string;
+  /** The nature's display name for the field; falls back to the key. */
+  label?: string | null;
   check_plugin: string;
   expected_value: string | null;
   extracted_value: string | null;
@@ -406,6 +438,7 @@ export interface VerificationResult {
   extraction_strategy: ExtractionStrategy | null;
   attempt_count: number;
   metadata: Record<string, unknown> | null;
+  context?: VerificationContext | null;
   created_at: string;
   updated_at: string;
   processing_started_at: string | null;
@@ -472,4 +505,166 @@ export interface NatureAvailable {
   expects: string[];
   /** The same keys with their label and type, in the nature's own order. */
   fields: ExpectedField[];
+}
+
+// --- Insights (Overview, AI report, Usage) --------------------------------
+// Mirrors app/api/v1/schemas/insights.py. Red flag = a COMPLETED job whose
+// verdict is FAIL or PARTIAL; issues = MISMATCH + NOT_VERIFIABLE checks plus
+// failed integrity checks. Those definitions live in the backend only.
+
+export type InsightDimension =
+  | "department"
+  | "location"
+  | "entity"
+  | "criticality"
+  | "nature"
+  | "submitter"
+  | "field";
+
+export interface InsightMonth {
+  key: string;
+  label: string;
+  partial: boolean;
+}
+
+export interface InsightBreakdown {
+  key: string;
+  label: string;
+  total: number;
+  red_flagged: number;
+}
+
+export interface InsightFieldCount {
+  key: string;
+  label: string;
+  count: number;
+}
+
+export interface InsightTrendPoint {
+  month: string;
+  label: string;
+  partial: boolean;
+  checked: number;
+  red_flagged: number;
+  rate: number;
+}
+
+export interface InsightsOverview {
+  months: InsightMonth[];
+  truncated: boolean;
+  kpis: {
+    checked: number;
+    checks_run: number;
+    clean: number;
+    red_flagged: number;
+    red_flag_rate: number;
+    high_criticality_red_flagged: number;
+    departments_impacted: number;
+    avg_turnaround_seconds: number | null;
+    rate_change: {
+      current_month: string;
+      current_rate: number;
+      previous_month: string;
+      previous_rate: number;
+      delta: number;
+    } | null;
+  };
+  trend: InsightTrendPoint[];
+  criticality: InsightBreakdown[];
+  fields: InsightFieldCount[];
+  breakdowns: Record<
+    "department" | "location" | "nature" | "submitter" | "client" | "entity",
+    InsightBreakdown[]
+  >;
+}
+
+export interface InsightReportRow {
+  verification_id: string;
+  reference_id: string;
+  tenant_id: string;
+  client_id: string;
+  client_name: string | null;
+  submitted_at: string;
+  title: string | null;
+  act: string | null;
+  department: string | null;
+  location: string | null;
+  nature: string;
+  criticality: Criticality | null;
+  submitter: string | null;
+  job_status: JobStatus;
+  verdict: Verdict | null;
+  red_flag: boolean;
+  issues: number;
+}
+
+export interface InsightsReport {
+  items: InsightReportRow[];
+  total: number;
+  page: number;
+  page_size: number;
+  counts: { all: number; red_flagged: number; clean: number };
+  truncated: boolean;
+}
+
+export interface InsightsDetail {
+  verification_id: string;
+  reference_id: string;
+  tenant_id: string;
+  tenant_name: string | null;
+  client_id: string;
+  client_name: string | null;
+  nature: string;
+  nature_label: string;
+  job_status: JobStatus;
+  verdict: Verdict | null;
+  verdict_reason: string | null;
+  confidence_score: string | null;
+  failure_reason: string | null;
+  red_flag: boolean;
+  issues: number;
+  checks: CheckResult[];
+  integrity: { plugin: string; status: StepStatus; severity: Severity; error: string | null }[];
+  documents: { file_name: string; doc_type: string | null; page_count: number | null }[];
+  pages: number;
+  context: VerificationContext | null;
+  created_at: string;
+  processing_completed_at: string | null;
+  turnaround_seconds: number | null;
+}
+
+export interface InsightClientUsage {
+  tenant_id: string;
+  tenant_name: string;
+  client_id: string;
+  name: string;
+  onboarded_at: string;
+  verifications: number;
+  red_flag_rate: number;
+  avg_turnaround_seconds: number | null;
+  failed: number;
+  current_month: number;
+  monthly_quota: number | null;
+}
+
+export interface InsightsUsage {
+  months: InsightMonth[];
+  truncated: boolean;
+  kpis: {
+    verifications: number;
+    pages: number;
+    pages_per_verification: number;
+    success_rate: number;
+    failed: number;
+    avg_turnaround_seconds: number | null;
+    active_clients: number;
+    tenants: number;
+  };
+  monthly: {
+    month: string;
+    label: string;
+    partial: boolean;
+    by_client: { client_id: string; count: number }[];
+  }[];
+  clients: InsightClientUsage[];
 }

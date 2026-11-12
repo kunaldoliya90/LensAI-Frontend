@@ -80,18 +80,11 @@
   --animate-beam: beam 3.2s ease-in-out infinite;
 }
 
-/* The console's grounds and its two glow sets, as gradients rather than
-   colours — they cannot live in @theme, which only takes single values. These
-   are Neon's, the ground the console opens on, and they sit on :root rather
-   than in their own block so that .panel paints correctly anywhere;
-   Porcelain overrides every one of them below.
-
-   The point of the set: a panel here is a pane of violet glass over a
-   near-black page, not a grey box. --panel is a lift of violet-white,
-   --panel-glow is what that pane throws when the pointer is on it, and
-   --glow-a/b/c are the three slow colour fields — violet, violet, cyan —
-   drifting behind the whole console. Swap these five and the console changes
-   ground; no component knows the difference. */
+/* Panel, glow and treatment defaults, as gradients rather than colours — they
+   cannot live in @theme, which only takes single values. They sit on :root so
+   .panel paints sensibly anywhere (the marketing site uses the dark glass
+   defaults); the console's [data-theme="enterprise"] block overrides every one
+   of them with flat values. */
 :root {
   /* The top stop stays well short of the violet the design puts there, for two
      reasons. The field is painted twice — this gradient and the drifting spans
@@ -273,239 +266,113 @@
 }
 
 /* ---------------------------------------------------------------------------
-   The console's two grounds. The marketing site is dark and does not switch.
+   The console's ground. The marketing site is dark and does not switch.
    ---------------------------------------------------------------------------
    Only the tokens are redefined, on the console's own root element. Every
    component paints with bg-ground, text-ink, border-line, the semantic set and
-   the .panel card class, so they follow the variables down the tree and not one
-   component file needs a per-theme variant. That is the whole return on the
-   token layer, and it is why two complete grounds cost one block each.
+   the .panel card class, so they follow the variables down the tree and no
+   component file needs a variant.
 
-   Both are the console design's own palettes. "Neon" is the loud one — violet
-   glass over a near-black page, not the navy in @theme, which is the marketing
-   palette — and "Porcelain" is warm paper rather than white on black inverted.
-   Values are the design's except where contrast forced a change; in each case
-   the note says why.
+   "Enterprise" is the LensAI Insights design (2026-11): a neutral canvas, white
+   panels, one petrol accent, and red / amber / green kept for status only. It
+   replaced the earlier Neon and Porcelain pair, and with them the theme switch:
+   a console read by compliance heads gets one calm, printable look.
 
-   Some tokens have to be inverted rather than lightened between the two, not
-   scaled: accent-bright and the pass / warn / fail semantics are chosen to be
-   BRIGHTER than surrounding text on a dark ground and DARKER than it on paper.
+   An attribute on a wrapper rather than :root so the marketing site keeps its
+   own dark palette, and so a <dialog> opened inside still inherits it. */
+[data-theme="enterprise"] {
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", Consolas, monospace;
 
-   Why an attribute on a wrapper rather than a media query: the choice is the
-   user's, per area, and ConsoleShell holds it in one place. */
+  /* 8px panels, 6px controls. */
+  --radius-md: 6px;
+  --radius-lg: 8px;
 
-/* What both grounds share: the face, the radii, and the fact that the wrapper
-   is the element that paints the page. */
-[data-theme="neon"],
-[data-theme="porcelain"] {
-  /* The console is set in Geist, the design's face. Marketing and auth keep
-     Inter, so the families are re-pointed here rather than in @theme. */
-  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+  --color-surface: #f4f5f7; /* the page */
+  --color-ground: #ffffff; /* panels, inputs, dialogs */
+  --color-surface-strong: #f2f4f7; /* hovers, insets, chips */
+  --color-deep: #f4f5f7;
+  --color-deep-2: #f9fafb; /* table heads, subtle fills */
 
-  /* Panels are 12px in the console and controls 8px — Neon takes both a step
-     up, in its own block. Re-valuing the variables the utilities already read
-     leaves the marketing radii alone. */
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  /* 17.7:1, 7.6:1 and 4.8:1 on white; ink-subtle still clears AA on the page. */
+  --color-ink: #101828;
+  --color-ink-muted: #475467;
+  --color-ink-subtle: #667085;
+
+  --color-line: #e4e7ec;
+  --color-line-strong: #d0d5dd;
+
+  /* One petrol for fill and for text: 9.1:1 on white, so accent-bright need
+     not differ from accent the way it did on a dark ground. */
+  --color-accent: #0b4f6c;
+  --color-accent-bright: #0b4f6c;
+  --color-accent-soft: #e7f0f4;
+
+  --color-btn: #0b4f6c;
+  --color-btn-hover: #083b51;
+  --color-btn-fg: #ffffff;
+
+  /* Status only. Each clears 4.5:1 on white and on its own soft fill. */
+  --color-pass: #067647;
+  --color-pass-soft: #ecfdf3;
+  --color-fail: #b42318;
+  --color-fail-soft: #fef3f2;
+  --color-warn: #b54708;
+  --color-warn-soft: #fffaeb;
+  --color-neutral: #475467;
+  --color-neutral-soft: #f2f4f7;
+
+  --color-code: rgb(16 24 40 / 0.04);
+
+  --shadow-xs: 0 1px 2px rgb(16 24 40 / 0.05);
+  --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.1);
+  --shadow-md: 0 4px 8px -2px rgb(16 24 40 / 0.1), 0 2px 4px -2px rgb(16 24 40 / 0.06);
+  --shadow-lg: 0 20px 40px -12px rgb(16 24 40 / 0.22);
+  --shadow-panel: 0 1px 2px rgb(16 24 40 / 0.05);
+
+  /* Flat: no field behind the panels, no glass, no glow. */
+  --console-bg: none;
+  --sidebar: none;
+  --mark: none;
+  --panel-base: #ffffff;
+  --panel: none;
+  --panel-warn: linear-gradient(#fffaeb, #fffaeb);
+  --panel-glow: 0 1px 3px rgb(16 24 40 / 0.08);
+  --glow-a: none;
+  --glow-b: none;
+  --glow-c: none;
+  --control-inset: 0 1px 2px rgb(16 24 40 / 0.05);
+  --btn-image: none;
+  --btn-glow: var(--shadow-xs);
+
+  --figure-size: 26px;
+  --figure-image: none;
+  --figure-fill: currentColor;
+  --nav-active-mark: none;
+  --bar-image: linear-gradient(var(--color-accent), var(--color-accent));
+
+  /* Charts. A neutral base for "checked", a brighter red mark for "red-flagged"
+     than the text red (it is a fill, not type), the meter track, and five
+     series colours for per-client stacks — petrol first, then muted hues that
+     stay apart from the status colours. */
+  --chart-base: #c5ccd6;
+  --chart-flag: #d92d20;
+  --chart-track: #eaecf0;
+  --series-1: #0b4f6c;
+  --series-2: #4f86b8;
+  --series-3: #8c6bb1;
+  --series-4: #c08a3e;
+  --series-5: #5c9ea0;
 
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-size: 13.5px;
   background-color: var(--color-surface);
-  background-image: var(--console-bg);
 }
 
-/* --- Neon: violet glass on a near-black page ----------------------------
-   The design's loud one. The page is near-black violet with two colour fields
-   drifting behind it, panels are translucent sheets of violet-white, the
-   accent glows, and a plain stat figure is filled with a gradient rather than
-   painted in an ink.
-
-   Every value below is measured against the panel, which composites to roughly
-   #241940 over the middle of this page and to #3f2e67 at its brightest — high
-   on the right, under the violet field, where a panel is lightest and its text
-   has the least to work with. That worst case is what decides an ink here, not
-   the average one. */
-[data-theme="neon"] {
-  /* The design's 16px card and 10px control, against Porcelain's 12 and 8. */
-  --radius-md: 10px;
-  --radius-lg: 16px;
-
-  --color-surface: #06050e; /* the page */
-  /* Just above where the panel gradient composites, so a field or a secondary
-     button on a panel reads as a plate on glass rather than a hole cut in it.
-     The 1px line around it is what says which way it is raised. */
-  --color-ground: #2a1e4a; /* opaque panels, inputs, dialogs */
-  --color-surface-strong: rgb(216 190 255 / 0.1); /* hovers, insets, chips */
-  --color-deep: #05040c;
-  --color-deep-2: #150e2e;
-
-  /* 10.5:1, 6.4:1 and 5.2:1 against the brightest panel. Violet-tinted rather
-     than grey, the way Porcelain's are warm rather than neutral: an ink that
-     ignores the ground under it reads as dirty. ink-subtle is #b1a8d2 and not the
-     design's #8a83ab, which lands at 2.9:1 there — and it is the ink carrying
-     the mono micro-labels and the table headers, the smallest text here. */
-  --color-ink: #f4f1ff;
-  --color-ink-muted: #c3bbe2;
-  --color-ink-subtle: #b1a8d2;
-
-  /* Translucent and violet-white, so a hairline composites into whichever
-     ground it lands on rather than laying a flat grey over the panel. */
-  --color-line: rgb(190 170 255 / 0.17);
-  --color-line-strong: rgb(190 170 255 / 0.3);
-
-  /* Two violets, because one cannot do both jobs: `accent` is a fill — bars,
-     rings, the selection — and `accent-bright` is the one that has to be
-     legible AS text, which #a855f7 is not (2.6:1 on the brightest panel). */
-  --color-accent: #a855f7;
-  --color-accent-bright: #d8b4fe;
-  --color-accent-soft: rgb(168 85 247 / 0.2);
-
-  /* The flat fill under the gradient below, and the hover. Both carry white. */
-  --color-btn: #7c3aed;
-  --color-btn-hover: #6d28d9;
-  --color-btn-fg: #ffffff;
-
-  /* The design's set, brightened where the panel forced it: 7.2:1, 8.1:1 and
-     5.4:1. fail is #ff8f9f rather than the design's #fb7185, which reaches
-     only 4.3:1 on the brightest panel and is the one status a person must not
-     miss. */
-  --color-pass: #34e5a3;
-  --color-pass-soft: rgb(52 229 163 / 0.14);
-  --color-fail: #ff8f9f;
-  --color-fail-soft: rgb(255 143 159 / 0.14);
-  --color-warn: #fcd34d;
-  --color-warn-soft: rgb(252 211 77 / 0.14);
-  --color-neutral: #c3bbe2;
-  --color-neutral-soft: rgb(190 170 255 / 0.1);
-
-  --color-code: rgb(3 2 12 / 0.5);
-
-  /* Elevation, violet-black rather than neutral black: the cast under a pane of
-     glass should be the page's own colour, darker. */
-  --shadow-xs: 0 1px 2px 0 rgb(4 2 14 / 0.55);
-  --shadow-sm: 0 1px 3px rgb(4 2 14 / 0.6), 0 1px 2px -1px rgb(4 2 14 / 0.5);
-  --shadow-md: 0 8px 22px -6px rgb(4 2 14 / 0.75), 0 2px 6px -2px rgb(4 2 14 / 0.55);
-  --shadow-lg: 0 24px 55px -14px rgb(4 2 14 / 0.85), 0 8px 18px -8px rgb(4 2 14 / 0.65);
-  --shadow-panel:
-    inset 0 1px 0 rgb(216 190 255 / 0.16), 0 1px 2px rgb(4 2 14 / 0.55),
-    0 28px 68px -32px rgb(4 2 14 / 0.95);
-
-  /* The primary button runs cyan into violet into magenta as the design has it,
-     but darkened along its whole length: the design's own #22d3ee start carries
-     white text at 1.8:1, where these three stops clear AA at 5.4, 5.7 and 6.3.
-     The brightness that came off the cyan is in the cast under the button,
-     which is where it can be as loud as it likes. */
-  --btn-image: linear-gradient(120deg, #0e7490 0%, #7c3aed 55%, #a21caf 100%);
-  --btn-glow:
-    0 10px 30px -10px rgb(168 85 247 / 0.9), 0 4px 20px -12px rgb(34 211 238 / 0.85);
-
-  /* What makes this a direction and not a palette. The figure is bigger and
-     filled with the design's white-violet-cyan gradient; the rail's current row
-     keeps the 2px bar it carries on every ground and gains the design's ring
-     and glow around it; a chart bar runs cyan up into violet.
-
-     32px and not the design's 36px because the console sets its figures in
-     Geist Mono, which runs wider per glyph than the Archivo the mock used — 32
-     is where the two match in weight on a card of the same width. */
-  --figure-size: 32px;
-  --figure-image: linear-gradient(120deg, #ffffff 18%, #d8b4fe 58%, #67e8f9 100%);
-  --figure-fill: transparent;
-  --nav-active-mark:
-    inset 2px 0 0 #d8b4fe, inset 0 0 0 1px rgb(216 180 254 / 0.32),
-    0 0 24px -6px rgb(168 85 247 / 0.9);
-  --bar-image: linear-gradient(180deg, #22d3ee 0%, #a855f7 55%, #6d28d9 100%);
-
-  /* --console-bg, --sidebar, --mark, --panel, --panel-warn, --panel-glow,
-     --glow-a/b/c and --control-inset are already this ground's values on :root,
-     so it inherits its grounds and its glows rather than restating them. */
-}
-
-/* --- Porcelain: warm paper ----------------------------------------------- */
-[data-theme="porcelain"] {
-  --color-surface: #e9e5de; /* the page */
-  --color-ground: #fbfaf8; /* opaque panels, inputs, dialogs */
-  --color-surface-strong: rgb(35 31 27 / 0.045); /* hovers, insets, chips */
-  --color-deep: #e9e5de;
-  --color-deep-2: #efece6;
-
-  /* ink-subtle is #6e6860, not the design's #807a70, which lands at 3.8:1 on
-     the page. It is the colour used for table headers and the small uppercase
-     labels that are hardest to read already, so it has to clear AA. The
-     design's fourth ink step is folded into it: four text greys cannot all
-     clear 4.5:1 on a light ground — that caps relative luminance at 0.142, and
-     these three already fill it. */
-  --color-ink: #211e1a;
-  --color-ink-muted: #5c574f;
-  --color-ink-subtle: #6e6860;
-
-  --color-line: rgb(35 31 27 / 0.1);
-  --color-line-strong: rgb(35 31 27 / 0.18);
-
-  /* accent-bright is the deep navy, not the design's mid blue, because it is
-     the "legible as text" accent and the mid blue is not. */
-  --color-accent: #3f5f9e;
-  --color-accent-bright: #35507f;
-  --color-accent-soft: #e6eaf3;
-
-  /* Ink on paper, the design's primary button. */
-  --color-btn: #211e1a;
-  --color-btn-hover: #35302a;
-  --color-btn-fg: #f7f4ef;
-
-  /* The design's porcelain set, each measured against both the panel and its
-     own soft fill: 5.3:1, 4.6:1, 4.9:1. */
-  --color-pass: #2f6b54;
-  --color-pass-soft: #e3efe8;
-  --color-fail: #9e4a45;
-  --color-fail-soft: #f6e6e3;
-  --color-warn: #8a6420;
-  --color-warn-soft: #f6ecda;
-  --color-neutral: #5c574f;
-  --color-neutral-soft: rgb(35 31 27 / 0.06);
-
-  --color-code: rgb(28 26 23 / 0.05);
-
-  --console-bg: radial-gradient(120% 90% at 78% -10%, #fbf9f5 0%, #f1ede6 42%, #e7e2da 100%);
-  --sidebar: linear-gradient(180deg, rgb(255 255 255 / 0.72), rgb(255 255 255 / 0.34));
-  --mark: linear-gradient(150deg, #ffffff, #ede8e0);
-  --panel: linear-gradient(
-    155deg,
-    rgb(255 255 255 / 0.82),
-    rgb(255 255 255 / 0.46) 52%,
-    rgb(255 255 255 / 0.3)
-  );
-  --panel-warn: linear-gradient(
-    155deg,
-    rgb(246 236 219 / 0.9),
-    rgb(255 255 255 / 0.5) 55%,
-    rgb(255 255 255 / 0.34)
-  );
-
-  /* Elevation has to be re-tuned, not reused: the dark set is up to 70% black
-     because a shadow only reads on a dark ground if it is genuinely darker
-     than it. The same values on paper look like smudges. */
-  --shadow-xs: 0 1px 2px 0 rgb(35 31 27 / 0.04);
-  --shadow-sm: 0 1px 2px rgb(35 31 27 / 0.06), 0 1px 3px rgb(35 31 27 / 0.05);
-  --shadow-md: 0 4px 12px -2px rgb(35 31 27 / 0.08), 0 2px 4px -2px rgb(35 31 27 / 0.06);
-  --shadow-lg: 0 12px 32px -8px rgb(35 31 27 / 0.12), 0 4px 10px -4px rgb(35 31 27 / 0.07);
-  --shadow-panel:
-    inset 0 1px 0 rgb(255 255 255 / 0.85), 0 1px 2px rgb(35 31 27 / 0.06),
-    0 22px 50px -28px rgb(35 31 27 / 0.3);
-
-  /* The same two mechanisms, dialled right down. A glow that reads as light on
-     a dark ground reads as a stain on paper, so here the pointer response is
-     mostly a deeper cast, and the drifting field is barely a tint — enough that
-     the page is not dead, not enough to look like a gradient. */
-  --panel-base: rgb(255 255 255 / 0.62);
-  --control-inset: inset 0 1px 2px rgb(35 31 27 / 0.055);
-  --panel-glow: 0 0 0 1px rgb(63 95 158 / 0.18), 0 18px 40px -20px rgb(35 31 27 / 0.22);
-  --glow-a: radial-gradient(closest-side, rgb(63 95 158 / 0.13), transparent);
-  --glow-b: radial-gradient(closest-side, rgb(138 100 32 / 0.1), transparent);
-  --glow-c: radial-gradient(closest-side, rgb(47 107 84 / 0.09), transparent);
-
-  --btn-image: none;
-  --btn-glow: none;
+/* The rail is a white column on the grey canvas, not a translucent sheet. */
+[data-theme="enterprise"] .rail {
+  background-color: var(--color-ground);
 }
 
 @layer base {
@@ -517,12 +384,8 @@
      shows through an overscroll bounce and behind a `position: fixed` gap. This
      keeps that sliver the right colour without the console layout needing to
      reach up to <body>, which it cannot do from a nested route group. */
-  body:has([data-theme="porcelain"]) {
-    background-color: #e9e5de;
-  }
-
-  body:has([data-theme="neon"]) {
-    background-color: #06050e;
+  body:has([data-theme="enterprise"]) {
+    background-color: #f4f5f7;
   }
 
   body {

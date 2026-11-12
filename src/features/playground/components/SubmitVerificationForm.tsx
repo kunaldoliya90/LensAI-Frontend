@@ -8,7 +8,7 @@ import { Callout } from "@/components/ui/Callout";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
-import type { DocumentInput } from "@/lib/api/types";
+import type { Criticality, DocumentInput, VerificationContext } from "@/lib/api/types";
 import { parseJsonObject } from "@/lib/json";
 import { listSubmittableNatures, submitVerification } from "../api/playground";
 import { ExpectedValuesFields } from "./ExpectedValuesFields";
@@ -31,6 +31,7 @@ export function SubmitVerificationForm({
   const [idempotencyKey, setIdempotencyKey] = useState("");
   const [callbackUrl, setCallbackUrl] = useState("");
   const [metadataText, setMetadataText] = useState("");
+  const [context, setContext] = useState<Record<ContextKey, string>>(EMPTY_CONTEXT);
 
   const natures = useQuery({
     queryKey: ["submittable-natures", apiKey],
@@ -85,6 +86,7 @@ export function SubmitVerificationForm({
         ),
         callback_url: callbackUrl.trim() || undefined,
         metadata: metadata?.ok ? metadata.value : undefined,
+        context: buildContext(context),
       },
     });
 
@@ -154,6 +156,41 @@ export function SubmitVerificationForm({
           }
         />
 
+        {/* Optional, and folded away: it feeds the Insights dashboards rather
+            than the verdict. Sent only when a submitter email is given, because
+            the API requires one whenever context is present. */}
+        <details className="group rounded-md border border-line">
+          <summary className="cursor-pointer px-3 py-2.5 text-sm font-medium group-open:border-b group-open:border-line">
+            Submission context <span className="font-normal text-ink-subtle">(optional — powers Insights)</span>
+          </summary>
+          <div className="grid gap-4 p-3 sm:grid-cols-2">
+            {CONTEXT_FIELDS.map(([key, label, placeholder]) =>
+              key === "criticality" ? (
+                <Select
+                  key={key}
+                  label={label}
+                  value={context.criticality}
+                  onChange={(event) => setContext((c) => ({ ...c, criticality: event.target.value }))}
+                >
+                  <option value="">Not set</option>
+                  <option value="HIGH">High</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="LOW">Low</option>
+                </Select>
+              ) : (
+                <Input
+                  key={key}
+                  label={label}
+                  type={key.endsWith("email") ? "email" : "text"}
+                  placeholder={placeholder}
+                  value={context[key]}
+                  onChange={(event) => setContext((c) => ({ ...c, [key]: event.target.value }))}
+                />
+              ),
+            )}
+          </div>
+        </details>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <Input
             label="Idempotency-Key"
@@ -197,4 +234,57 @@ export function SubmitVerificationForm({
       </div>
     </section>
   );
+}
+
+type ContextKey =
+  | "submitter_name"
+  | "submitter_email"
+  | "approver_name"
+  | "approver_email"
+  | "title"
+  | "act"
+  | "criticality"
+  | "department"
+  | "location"
+  | "entity"
+  | "period";
+
+const CONTEXT_FIELDS: [ContextKey, string, string][] = [
+  ["submitter_name", "Submitted by — name", "Ananya Rao"],
+  ["submitter_email", "Submitted by — email", "ananya@client.com"],
+  ["approver_name", "Approver — name", "Deepa Menon"],
+  ["approver_email", "Approver — email", "deepa@client.com"],
+  ["title", "Compliance title", "PF monthly contribution (ECR challan)"],
+  ["act", "Act", "EPF & MP Act, 1952"],
+  ["criticality", "Criticality", ""],
+  ["department", "Department", "HR"],
+  ["location", "Location", "Mumbai"],
+  ["entity", "Entity", "Sunrise Foods Pvt Ltd"],
+  ["period", "Period", "Oct 2026"],
+];
+
+const EMPTY_CONTEXT = Object.fromEntries(CONTEXT_FIELDS.map(([key]) => [key, ""])) as Record<
+  ContextKey,
+  string
+>;
+
+function buildContext(values: Record<ContextKey, string>): VerificationContext | undefined {
+  const v = (key: ContextKey) => values[key].trim() || undefined;
+  const email = v("submitter_email");
+  if (!email) return undefined;
+  const approverName = v("approver_name");
+  const approverEmail = v("approver_email");
+  return {
+    submitted_by: { email, name: v("submitter_name") },
+    approver: approverName || approverEmail ? { name: approverName, email: approverEmail } : undefined,
+    record: {
+      title: v("title"),
+      act: v("act"),
+      criticality: (v("criticality") as Criticality | undefined) ?? undefined,
+      department: v("department"),
+      location: v("location"),
+      entity: v("entity"),
+      period: v("period"),
+    },
+  };
 }

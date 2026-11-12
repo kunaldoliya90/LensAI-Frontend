@@ -1,14 +1,12 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import { LogOut, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Logo } from "@/components/Logo";
 import { cn } from "@/lib/cn";
 import type { UserRole } from "@/lib/api/types";
 import type { Session } from "@/lib/auth/session";
 import { isActive, navFor, visibleItems } from "../consoleNav";
-import { CONSOLE_THEME_LABEL, type ConsoleTheme } from "../consoleTheme";
 
 const ROLE_LABEL: Record<UserRole, string> = {
   USER: "Tenant user",
@@ -19,16 +17,12 @@ const ROLE_LABEL: Record<UserRole, string> = {
 export function ConsoleSidebar({
   session,
   open,
-  theme,
   onNavigate,
-  onToggleTheme,
   onLogOut,
 }: {
   session: Session;
   open: boolean;
-  theme: ConsoleTheme;
   onNavigate: () => void;
-  onToggleTheme: () => void;
   onLogOut: () => void;
 }) {
   const pathname = usePathname();
@@ -52,20 +46,26 @@ export function ConsoleSidebar({
         open ? "grid border-b" : "hidden lg:grid",
       )}
     >
-      <div className="hidden h-14 items-center border-b border-line px-4 lg:flex">
-        <Logo href="/app" subtitle="Console" variant="console" />
-      </div>
+      <Link href="/app" className="hidden h-14 items-center gap-2.5 border-b border-line px-5 lg:flex">
+        <span aria-hidden className="grid size-7 place-items-center rounded-md bg-accent text-btn-fg">
+          <Search className="size-4" strokeWidth={1.8} />
+        </span>
+        <span className="leading-tight">
+          <b className="block text-[15px] font-semibold tracking-[-0.01em] text-ink">LensAI</b>
+          <small className="block text-[11.5px] text-ink-subtle">Compliance intelligence</small>
+        </span>
+      </Link>
 
       <nav
         aria-label="Console"
-        className="grid grid-cols-[minmax(0,1fr)] content-start gap-3 overflow-y-auto p-2.5"
+        className="grid grid-cols-[minmax(0,1fr)] content-start gap-5 overflow-y-auto px-3 py-4"
       >
         {groups.map((group) => (
           <div key={group.heading}>
-            <p className="px-2 font-mono text-[9.5px] tracking-[0.12em] text-ink-subtle uppercase">
+            <p className="px-2.5 pb-1.5 text-[11px] font-semibold tracking-[0.08em] text-ink-subtle uppercase">
               {group.heading}
             </p>
-            <ul className="mt-1.5 grid gap-px">
+            <ul className="grid gap-0.5">
               {group.items.map((item) => {
                 const active = isActive(item.href, pathname);
 
@@ -76,18 +76,9 @@ export function ConsoleSidebar({
                       onClick={onNavigate}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "block rounded-md px-2.5 py-[7px] text-[13px] transition-colors",
+                        "block rounded-md px-2.5 py-2 text-[13.5px] font-medium transition-colors",
                         active
-                          ? // The active marker is a bar as well as a colour, so the
-                            // current page is findable without relying on the accent
-                            // being distinguishable. An inset shadow rather than a
-                            // positioned span: same mark, one element, and it cannot
-                            // fall outside the row's rounded corner. What the mark
-                            // is beyond that bar is the ground's to say — Neon rings
-                            // the row and gives it the accent's glow — so it comes
-                            // from --nav-active-mark rather than being spelled out
-                            // here for one palette.
-                            "bg-accent-soft font-medium text-ink shadow-[var(--nav-active-mark)]"
+                          ? "bg-accent-soft text-accent"
                           : "text-ink-muted hover:bg-surface-strong hover:text-ink",
                       )}
                     >
@@ -101,42 +92,13 @@ export function ConsoleSidebar({
         ))}
       </nav>
 
-      {/* The ground switch and the identity block, both properties of the
-          console rather than of the page open inside it. On a shared account the
-          question the identity answers is "whose session is this". */}
+      {/* The identity block: on a shared account the question it answers is
+          "whose session is this". */}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-2.5 border-t border-line p-3">
-        <button
-          type="button"
-          onClick={onToggleTheme}
-          aria-pressed={theme === "neon"}
-          className="flex items-center justify-between gap-2 rounded-md border border-line-strong px-2.5 py-2 text-[12px] text-ink-muted transition-colors hover:bg-surface-strong hover:text-ink"
-        >
-          {/* The visible label names the ground now in use, as the design has
-              it; the rest of the accessible name says what pressing does, and
-              is appended rather than replacing it so the visible text stays a
-              prefix of the name a voice-control user would speak. */}
-          <span>{CONSOLE_THEME_LABEL[theme]}</span>
-          <span className="sr-only">
-            {" "}
-            theme — switch to {CONSOLE_THEME_LABEL[theme === "neon" ? "porcelain" : "neon"]}
-          </span>
-          <span
-            aria-hidden
-            className="inline-flex h-[15px] w-[26px] shrink-0 items-center rounded-full bg-line-strong p-0.5"
-          >
-            <span
-              className={cn(
-                "size-[11px] rounded-full bg-accent transition-transform duration-300 ease-out-soft",
-                theme === "neon" ? "translate-x-0" : "translate-x-[11px]",
-              )}
-            />
-          </span>
-        </button>
-
         <div className="flex items-center gap-2.5">
           <span
             aria-hidden
-            className="grid size-7 shrink-0 place-items-center rounded-full bg-surface-strong font-mono text-[11px] text-ink-muted"
+            className="grid size-7 shrink-0 place-items-center rounded-full bg-accent-soft text-[11px] font-semibold text-accent"
           >
             {initials(session.email)}
           </span>

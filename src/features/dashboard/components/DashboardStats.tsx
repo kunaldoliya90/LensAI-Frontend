@@ -77,7 +77,7 @@ export function DashboardStats({
         value={figure(current?.failed_attempt_tokens)}
         delta={delta("failed_attempt_tokens", wasted > 0 ? "fail" : undefined)}
         detail={
-          <Link href="/app/usage" className="text-accent-bright underline underline-offset-2">
+          <Link href="/app/billing" className="text-accent-bright underline underline-offset-2">
             Split by provider scope
           </Link>
         }

@@ -15,61 +15,59 @@ export interface NavGroup {
   items: NavItem[];
 }
 
+/** The three Insights pages lead both consoles: they are what a compliance
+ *  head opens LensAI for. Staff read them across tenants. */
+const INSIGHTS: NavGroup = {
+  heading: "Insights",
+  items: [
+    { href: "/app", label: "Overview" },
+    { href: "/app/report", label: "AI report" },
+    { href: "/app/usage", label: "Usage" },
+  ],
+};
+
 /**
- * A tenant's own console. Every section here is that tenant's product
- * configuration — nothing on this list is staff-only, and nothing on the
- * staff list below duplicates it.
+ * A tenant's own console: insights first, then wiring a tool in, then the
+ * configuration behind it. Nothing here is staff-only.
  */
 const USER_NAV: NavGroup[] = [
+  INSIGHTS,
   {
-    heading: "Overview",
-    items: [
-      { href: "/app", label: "Dashboard" },
-      { href: "/app/settings", label: "Settings" },
-    ],
-  },
-  {
-    heading: "Work",
-    items: [{ href: "/app/playground", label: "Playground" }],
-  },
-  {
-    heading: "Setup",
+    heading: "Integrate",
     items: [
       { href: "/app/clients", label: "Clients" },
       { href: "/app/keys", label: "API keys" },
       { href: "/app/webhooks", label: "Webhooks" },
-      { href: "/app/document-types", label: "Document types" },
-      { href: "/app/reference-data", label: "Reference data" },
-      { href: "/app/ai", label: "AI providers" },
+      { href: "/app/playground", label: "Playground" },
     ],
   },
   {
-    heading: "Operate",
+    heading: "Configure",
     items: [
+      { href: "/app/document-types", label: "Document types" },
+      { href: "/app/reference-data", label: "Reference data" },
+      { href: "/app/ai", label: "AI providers" },
       { href: "/app/deliveries", label: "Deliveries" },
-      { href: "/app/usage", label: "Usage" },
+      { href: "/app/activity", label: "Activity" },
+      { href: "/app/billing", label: "Token usage" },
+      { href: "/app/settings", label: "Settings" },
     ],
   },
 ];
 
 /**
- * LensAI staff. Every item here is a management action taken on a tenant's
- * behalf, never the tenant's own product — an admin does not own clients,
- * keys or templates the way a USER does, only the ability to act on them
- * where a permission was actually granted (see `app.core.permissions` on the
- * backend, the source of truth this mirrors).
+ * LensAI staff. Insights across every tenant, then the management actions
+ * taken on a tenant's behalf where a permission was granted (see
+ * `app.core.permissions` on the backend, the source of truth this mirrors).
  */
 const STAFF_NAV: NavGroup[] = [
   {
-    heading: "Overview",
+    heading: INSIGHTS.heading,
     items: [
-      { href: "/app", label: "Dashboard" },
-      { href: "/app/settings", label: "Settings" },
+      { href: "/app", label: "Overview", permission: "tenants" },
+      { href: "/app/report", label: "AI report", permission: "tenants" },
+      { href: "/app/usage", label: "Usage", permission: "usage" },
     ],
-  },
-  {
-    heading: "Work",
-    items: [{ href: "/app/playground", label: "Playground" }],
   },
   {
     heading: "Manage",
@@ -78,11 +76,16 @@ const STAFF_NAV: NavGroup[] = [
       { href: "/staff/tenants", label: "Tenants", permission: "tenants" },
       { href: "/staff/keys", label: "Approval queue", permission: "api_keys" },
       { href: "/staff/api-keys", label: "API keys", permission: "api_keys" },
+      { href: "/app/playground", label: "Playground" },
     ],
   },
   {
     heading: "Platform",
-    items: [{ href: "/staff/usage", label: "Usage", permission: "usage" }],
+    items: [
+      { href: "/staff/usage", label: "Token usage", permission: "usage" },
+      { href: "/app/activity", label: "Activity" },
+      { href: "/app/settings", label: "Settings" },
+    ],
   },
   {
     heading: "Administration",

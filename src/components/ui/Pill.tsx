@@ -24,7 +24,8 @@ export function Pill({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-sm border px-1.5 py-0.5 text-[10.5px] font-medium tracking-[0.06em] uppercase",
+        // A dot as well as a colour, so status is findable by shape too.
+        "inline-flex h-[22px] items-center gap-1.5 rounded-sm border px-2 text-[12px] font-medium whitespace-nowrap before:size-1.5 before:rounded-full before:bg-current",
         TONES[tone],
         className,
       )}

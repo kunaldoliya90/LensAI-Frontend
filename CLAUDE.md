@@ -46,42 +46,28 @@ Wire types are mirrored once, in `src/lib/api/types.ts`. Decimal fields
   without a reason.
 - **Feedback** is an inline `<Callout>` driven by mutation state. There is no
   toast system, and adding one would need a reason.
-- **The console's look is a token swap, not a component set.** The
-  `[data-theme="neon"]` and `[data-theme="porcelain"]` blocks in `globals.css`
-  re-value the same semantic tokens the components already paint with, so a new
-  console surface needs no per-ground variant — get the tokens right and both
-  grounds follow. Neon is the loud dark ground — violet glass over a near-black
-  page, distinct from the navy in `@theme`, which is the marketing palette;
-  Porcelain is warm paper. Both are set in Geist. Marketing and auth sit outside
-  that wrapper and are untouched by it.
-- **The ground also owns a display figure's face.** `.figure` sets the SANS
-  family, not the mono one, and no caller may add `font-mono` beside it — a
-  utility wins over the class. Geist Mono draws a slashed zero as its *default*
-  glyph, which was measured rather than assumed: `normal`, `"zero" 0`,
-  `"ss01" 0`, `ss02`, `ss03` and `cv01` all leave the slash. At 9px in an id it
-  is a useful 0-versus-O disambiguation; at 32px as a card's one figure it reads
-  as an error glyph, and a dashboard of zeros looked like four failures.
-- **Five console treatments belong to the ground, not to a component**, because
-  no Tailwind colour token can express them: `--figure-size` and
-  `--figure-image` behind `.figure` / `.figure-gradient`, `--nav-active-mark`
-  behind the rail's current row, `--bar-image` behind a chart bar, and
-  `--btn-image` / `--btn-glow` behind `.btn-primary`. Each has a neutral default
-  on `:root` that Porcelain inherits and Neon replaces. A component asks for the
-  treatment; it never names the colour. Add to that list rather than writing a
-  second ground's value into a `className`.
-- **Neon's values are the design's except where contrast forced a change**, and
-  each of those changes is noted at the token that made it — `ink-subtle`,
-  `fail` and the primary button's gradient. They are measured against the panel
-  at its brightest, high on the right under the violet field, rather than
-  against the page: that is where a panel has the least to give its own text.
-- **The ground is the user's choice and it persists.** `consoleTheme.ts` holds it
-  in `localStorage` behind an external store; `ConsoleShell` reads it with
-  `useSyncExternalStore` and puts it on `data-theme`, and the switch lives in the
-  sidebar footer. There is no flash to guard against because the shell renders
-  nothing until the session store has been read, which is already post-hydration.
-  `accent-bright` and `pass` / `warn` / `fail` are **inverted** between the two
-  grounds rather than scaled — on dark they are brighter than the text around
-  them, on paper they must be darker.
+- **The console's look is a token swap, not a component set.** One ground,
+  `[data-theme="enterprise"]` in `globals.css` (the LensAI Insights design,
+  2026-11): neutral `#f4f5f7` canvas, white panels, one petrol accent
+  (`#0b4f6c`), red / amber / green for status only, IBM Plex Sans and Plex
+  Mono. `ConsoleShell` sets it on its outermost element. It replaced the
+  earlier Neon / Porcelain pair and the theme switch — do not reintroduce a
+  second ground without a product reason. Marketing and auth sit outside the
+  wrapper and keep their own dark palette.
+- **Treatments no Tailwind colour token can express belong to the ground**:
+  `--figure-size` / `--figure-image`, `--nav-active-mark`, `--bar-image`,
+  `--btn-image` / `--btn-glow`, and the chart set `--chart-base`,
+  `--chart-flag`, `--chart-track`, `--series-1…5`. A component asks for the
+  treatment (`bg-[var(--chart-flag)]`); it never names a hex value.
+- **`.figure` sets the SANS face with tabular figures**; do not put
+  `font-mono` beside it.
+- **Insights pages** (`features/insights`: Overview `/app`, AI report
+  `/app/report`, Usage `/app/usage`) read their whole scope — tenant (staff),
+  client, period, click-to-filter dimensions, search, page and the open review
+  — from URL params via `readScope`. Staff call `/admin/insights/*`, tenant
+  users `/portal/insights/*`; same shapes. Every count (red flag, issues,
+  turnaround) is computed by the backend; the frontend never re-derives one.
+  The old dashboard lives at `/app/activity`, token billing at `/app/billing`.
 - **`.panel` is the console's only card.** Border, the ground's radius,
   `--panel-base`, the translucent gradient and the elevation travel together,
   and it cannot be a Tailwind colour token — so it is a class, not a utility
@@ -94,9 +80,10 @@ Wire types are mirrored once, in `src/lib/api/types.ts`. Decimal fields
   reintroduce `rounded-lg border border-line bg-ground shadow-*` as a card.
   `.panel-warn` is the amber variant, for a card whose whole job is to say a
   human has to look at this.
-- **Micro-labels are mono, uppercase, 9.5–10px, letter-spaced.** Stat labels,
-  table headers and the sidebar group headings all use that treatment; panel
-  headings are 12.5px medium. The figure is the thing being read, not its label.
+- **Labels are sans, not mono.** Table headers are 12px medium `ink-subtle`
+  on the `deep-2` fill; section headings in the rail are 11px uppercase
+  semibold; panel headings are 14.5px semibold. Mono is for identifiers and
+  values (reference ids, extracted values), not for labels.
 - **The playground's run stage is driven by the trace, never by a clock.** The
   worker commits a step row as each pipeline stage finishes, so the stage after
   the last one in `GET /verifications/{id}/steps` is the one running now —

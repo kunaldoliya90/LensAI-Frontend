@@ -11,7 +11,7 @@ export function TableScroll({ children, className }: { children: ReactNode; clas
 }
 
 export function Table({ className, ...rest }: ComponentPropsWithoutRef<"table">) {
-  return <table className={cn("w-full border-collapse text-[12.5px]", className)} {...rest} />;
+  return <table className={cn("w-full border-collapse text-[13px] tabular-nums", className)} {...rest} />;
 }
 
 export function Th({ className, ...rest }: ComponentPropsWithoutRef<"th">) {
@@ -19,7 +19,7 @@ export function Th({ className, ...rest }: ComponentPropsWithoutRef<"th">) {
     <th
       scope="col"
       className={cn(
-        "border-b border-line px-4 py-2.5 text-left font-mono text-[10px] font-normal tracking-[0.08em] whitespace-nowrap text-ink-subtle uppercase",
+        "border-b border-line bg-deep-2 px-3.5 py-2.5 text-left text-[12px] font-medium whitespace-nowrap text-ink-subtle",
         className,
       )}
       {...rest}
@@ -32,7 +32,7 @@ export function Tr({ className, ...rest }: ComponentPropsWithoutRef<"tr">) {
     <tr
       className={cn(
         "border-b border-line transition-[background-color,box-shadow] last:border-b-0",
-        "hover:bg-surface-strong hover:shadow-[inset_2px_0_0_var(--color-accent)]",
+        "hover:bg-deep-2",
         className,
       )}
       {...rest}
@@ -41,7 +41,7 @@ export function Tr({ className, ...rest }: ComponentPropsWithoutRef<"tr">) {
 }
 
 export function Td({ className, ...rest }: ComponentPropsWithoutRef<"td">) {
-  return <td className={cn("px-4 py-2.5 align-middle", className)} {...rest} />;
+  return <td className={cn("px-3.5 py-2.5 align-middle", className)} {...rest} />;
 }
 
 /** A single full-width row for the loading, empty and error states of a table. */

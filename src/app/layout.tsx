@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, IBM_Plex_Mono, Inter } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans, Inter } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -15,20 +15,14 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-// Two families, loaded once at the root and chosen per area by the token layer:
-// the console is set in Geist, the marketing site and the auth pages in Inter.
-// See the [data-theme="light"] block in globals.css, which re-points --font-sans
-// and --font-mono for everything below the console shell.
-const geist = Geist({
+// Chosen per area by the token layer: the marketing site and the auth pages
+// are set in Inter, the console in IBM Plex Sans (see the
+// [data-theme="enterprise"] block in globals.css, which re-points --font-sans
+// and --font-mono below the console shell). Plex Mono serves both.
+const plexSans = IBM_Plex_Sans({
   subsets: ["latin"],
-  variable: "--font-geist",
-  display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-geist-mono",
+  weight: ["400", "500", "600"],
+  variable: "--font-plex-sans",
   display: "swap",
 });
 
@@ -58,7 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${plexMono.variable} ${geist.variable} ${geistMono.variable}`}
+      className={`${inter.variable} ${plexMono.variable} ${plexSans.variable}`}
     >
       <body className="min-h-dvh antialiased">{children}</body>
     </html>

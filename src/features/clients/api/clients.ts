@@ -4,6 +4,7 @@ import type { ClientSummary } from "@/lib/api/types";
 export interface CreateClientInput {
   name: string;
   contact_email?: string;
+  monthly_quota?: number;
 }
 
 export function listClients(): Promise<ClientSummary[]> {
