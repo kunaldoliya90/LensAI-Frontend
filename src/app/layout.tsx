@@ -19,9 +19,11 @@ const plexMono = IBM_Plex_Mono({
 // are set in Inter, the console in IBM Plex Sans (see the
 // [data-theme="enterprise"] block in globals.css, which re-points --font-sans
 // and --font-mono below the console shell). Plex Mono serves both.
+// Loaded as the variable font (no `weight` list): with a static weight list,
+// Next 16.3's Turbopack production build fails to resolve the font files
+// ("next/font/google queries have exactly one entry"). `next dev` is unaffected.
 const plexSans = IBM_Plex_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
   variable: "--font-plex-sans",
   display: "swap",
 });
